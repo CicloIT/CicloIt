@@ -49,8 +49,7 @@ function FormularioReclamos() {
         importancia: importancia,
         estado: estado,
       };
-      const response = await registrarReclamo(data);
-      console.log(response);
+      const response = await registrarReclamo(data);      
       if (response.id) {
         setMensajeExito('Reclamo creado exitosamente');
       } else {

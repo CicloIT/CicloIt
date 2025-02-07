@@ -18,8 +18,7 @@ function Login({setRol}) {
 
     try {
       const data = { nombre,contrasena };
-      const response = await login(data);
-      console.log(response);
+      const response = await login(data);      
 
       const decodedToken = jwtDecode(response.token);
       setRol(decodedToken.rol); // Actualizamos el rol en el componente padre

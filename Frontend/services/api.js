@@ -1,4 +1,4 @@
-const API_URL = 'https://backend-nu-nine-27.vercel.app';
+const API_URL = 'https://ciclo-it.vercel.app';
 
 export const login = async (data) => {
   try {
