@@ -8,6 +8,7 @@ const Navbar = ({ rol, setRol }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    setIsMobileMenuOpen(false);
     localStorage.removeItem("user");
     setRol(null);
     navigate("/login");
@@ -21,8 +22,22 @@ const Navbar = ({ rol, setRol }) => {
       {children}
     </Link>
   );
+  const MobileLink = ({ to, children }) => (
+    <Link 
+      to={to}
+      className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
+      onClick={() => setIsMobileMenuOpen(false)}
+    >
+      {children}
+    </Link>
+  );
+
 
   NavLink.propTypes = {
+    to: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired
+  };
+  MobileLink.propTypes = {
     to: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired
   };
@@ -80,69 +95,34 @@ const Navbar = ({ rol, setRol }) => {
 
       {/* Mobile menu */}
       <div 
-        className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="px-3 py-4 space-y-2 bg-slate-800 shadow-xl rounded-b-lg">
-          {rol === "admin" && (
-            <>
-              <Link 
-                to="/registro" 
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Registro usuario
-              </Link>
-              <Link 
-                to="/registrar-cliente"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Registrar cliente
-              </Link>
-              <Link 
-                to="/registrar-orden"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Registrar orden
-              </Link>
-              <Link 
-                to="/registrar-reclamo"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Registrar reclamos
-              </Link>
-              <Link 
-                to="/usuarios"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Ver usuarios
-              </Link>
-            </>
-          )}
-          {rol && (
-            <>
-              <Link 
-                to="/orden-trabajo"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Ordenes de trabajo
-              </Link>
-              <Link 
-                to="/reclamos"
-                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Reclamos
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left text-base font-medium text-gray-200 hover:bg-red-600 px-4 py-3 rounded-md transition-colors duration-200"
-              >
-                Cerrar sesión
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+    className={`lg:hidden transition-all duration-300 ease-in-out ${
+      isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+    }`}
+  >
+    <div className="px-3 py-4 space-y-2 bg-slate-800 shadow-xl rounded-b-lg">
+      {rol === "admin" && (
+        <>
+          <MobileLink to="/registro">Registro usuario</MobileLink>
+          <MobileLink to="/registrar-cliente">Registrar cliente</MobileLink>
+          <MobileLink to="/registrar-orden">Registrar orden</MobileLink>
+          <MobileLink to="/registrar-reclamo">Registrar reclamos</MobileLink>
+          <MobileLink to="/usuarios">Ver usuarios</MobileLink>
+        </>
+      )}
+      {rol && (
+        <>
+          <MobileLink to="/orden-trabajo">Ordenes de trabajo</MobileLink>
+          <MobileLink to="/reclamos">Reclamos</MobileLink>
+          <button
+            onClick={handleLogout}
+            className="w-full text-left text-base font-medium text-gray-200 hover:bg-red-600 px-4 py-3 rounded-md transition-colors duration-200"
+          >
+            Cerrar sesión
+          </button>
+        </>
+      )}
+    </div>
+  </div>
     </nav>
   );
 };
