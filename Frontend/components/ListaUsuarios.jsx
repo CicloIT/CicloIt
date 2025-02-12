@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { listaUsuarios } from "../services/api";
+import { Link } from "react-router-dom";
 
 function ListaUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -58,12 +59,12 @@ function ListaUsuarios() {
                   </span>
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <a
-                    href={`/usuarios/${usuario.id}`}
+                  <Link
+                    to={`/usuarios/${usuario.id}`}
                     className="text-blue-500 hover:underline"
                   >
                     Ver Perfil
-                  </a>
+                  </Link>
                 </td>
               </tr>
             ))

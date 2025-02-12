@@ -94,6 +94,12 @@ const Navbar = ({ rol, setRol }) => {
                 Registro usuario
               </Link>
               <Link 
+                to="/registrar-cliente"
+                className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
+              >
+                Registrar cliente
+              </Link>
+              <Link 
                 to="/registrar-orden"
                 className="block text-base font-medium text-gray-200 hover:bg-blue-600 px-4 py-3 rounded-md transition-colors duration-200"
               >
