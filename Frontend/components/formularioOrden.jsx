@@ -8,6 +8,8 @@ import {
 function FormularioOrden() {
     const [usuarios, setUsuarios] = useState([]);
     const [clientes, setClientes] = useState([]);
+    const [clientesFiltrados, setClientesFiltrados] = useState([]);
+    const [busquedaCliente, setBusquedaCliente] = useState("");
     const [idUsuario, setIdUsuario] = useState("");
     const [idCliente, setIdCliente] = useState("");
     const [importancia, setImportancia] = useState("");
@@ -19,16 +21,24 @@ function FormularioOrden() {
     useEffect(() => {
       const obtenerDatos = async () => {
         try {
-          const usuariosResponse = await obtenerUsuarios(); // Asumiendo que tienes una función para obtener los usuarios
-          const clientesResponse = await obtenerClientes(); // Lo mismo para los clientes
+          const usuariosResponse = await obtenerUsuarios();
+          const clientesResponse = await obtenerClientes();
           setUsuarios(usuariosResponse);
           setClientes(clientesResponse);
+          setClientesFiltrados(clientesResponse);
         } catch (error) {
           console.error("Error al obtener usuarios o clientes", error);
         }
       };
       obtenerDatos();
     }, []);
+
+    useEffect(() => {
+      const resultados = clientes.filter(cliente =>
+        cliente.empresa.toLowerCase().includes(busquedaCliente.toLowerCase())
+      );
+      setClientesFiltrados(resultados);
+    }, [busquedaCliente, clientes]);
   
     const manejarEnvio = async (e) => {
       e.preventDefault();
@@ -98,11 +108,18 @@ function FormularioOrden() {
   
           <div>
             <label
-              htmlFor="idCliente"
+              htmlFor="idCliente" 
               className="block text-sm font-medium text-gray-700"
             >
               Cliente:
             </label>
+            <input
+              type="text"
+              placeholder="Buscar cliente..."
+              value={busquedaCliente}
+              onChange={(e) => setBusquedaCliente(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
             <select
               id="idCliente"
               value={idCliente}
@@ -110,14 +127,13 @@ function FormularioOrden() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Seleccionar cliente</option>
-              {clientes.map((cliente) => (
+              {clientesFiltrados.map((cliente) => (
                 <option key={cliente.id} value={cliente.id}>
                   {cliente.empresa}
                 </option>
               ))}
             </select>
           </div>
-  
           <div className="mb-4">
             <label
               htmlFor="importancia"
