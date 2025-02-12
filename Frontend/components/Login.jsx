@@ -9,12 +9,14 @@ function Login({setRol}) {
   const [contrasena, setContrasena] = useState("");
   const [mensajeError, setMensajeError] = useState("");
   const [mensajeExito, setMensajeExito] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
     setMensajeError("");
     setMensajeExito("");
+    setIsLoading(true); 
 
     try {
       const data = { nombre,contrasena };
@@ -29,6 +31,8 @@ function Login({setRol}) {
     } catch (error) {
       setMensajeError("Error al intentar iniciar sesión");
       console.error(error);
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -70,9 +74,17 @@ function Login({setRol}) {
 
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
           >
-            Iniciar sesión
+             {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              <span className="ml-2">Iniciando sesion</span>
+            </div>
+          ) : (
+            'Iniciar sesión'
+          )}
           </button>
         </form>
 
