@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import PropTypes from 'prop-types';
-import Navbar from "../components/NavBar";
+
 import ListaUsuarios from "../components/ListaUsuarios";
 import PerfilUsuario from "../components/PerfilUsuario";
 import RegistroUsuarios from "../components/RegistroUsuarios";
@@ -12,11 +12,12 @@ import Login from "../components/Login";
 import Reclamos from "../components/Reclamos";
 import RegistrarCliente from "../components/RegistrarCliente";
 import FormularioOrden from "../components/formularioOrden";
+import Navbar from "../components/NavBar/NavBar";
 
 const Inicio = () => {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-center">Próximamente</h1>
+      <Reclamos />
     </div>
   );
 };
@@ -61,7 +62,7 @@ function App() {
 
   return (
     <Router>
-      <Navbar rol={rol} setRol={setRol} />
+      <Navbar rol={rol} setRol={setRol}/>
       <Routes>
         {/* Ruta de inicio de sesión */}
         <Route path="/login" element={<Login setRol={setRol} />} />

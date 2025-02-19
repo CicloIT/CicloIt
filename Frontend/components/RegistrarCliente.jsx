@@ -3,7 +3,7 @@ import { registrarCliente } from "../services/api"
 function RegistrarCliente() {
     const [nombre,setNombre] = useState("")
     const [empresa,setEmpresa] = useState("")
-    const [email,setEmail] = useState(null)
+    const [email,setEmail] = useState("")
     const [telefono,setTelefono] = useState("")
     const [localidad,setLocalidad] = useState("")
     const [provincia,setProvincia] = useState("")
@@ -19,7 +19,7 @@ function RegistrarCliente() {
             const response = await registrarCliente({
                 nombre,
                 empresa,
-                email,
+                email: email === "" ? null : email,
                 telefono,
                 localidad,
                 provincia,
