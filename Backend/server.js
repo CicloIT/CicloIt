@@ -1,4 +1,4 @@
-/*import db from "./db.js";
+/*import db.client from "./db.client.js";
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -24,7 +24,7 @@ const loginLimiter = rateLimit({
 app.post("/login", async (req, res) => {
   const { nombre, contrasena } = req.body;
   try {
-    const [users] = await db.query("SELECT * FROM usuarios WHERE nombre = ?", [
+    const [users] = await db.client.query("SELECT * FROM usuarios WHERE nombre = ?", [
       nombre,
     ]);
     const user = users[0];
@@ -70,7 +70,7 @@ app.post("/registro", async (req, res) => {
   try {
     const query =
       "INSERT INTO usuarios (nombre,apellido,contrasena,rol) VALUES (?, ?, ?, ?)";
-    const [resultado] = await db.query(query, [
+    const [resultado] = await db.client.query(query, [
       nombre,
       apellido,
       hashedPassword,
@@ -86,7 +86,7 @@ app.post("/registro", async (req, res) => {
 app.get("/usuarios", async (req, res) => {
   try {
     const query = "SELECT * FROM usuarios";
-    const [rows] = await db.query(query);
+    const [rows] = await db.client.query(query);
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
@@ -97,7 +97,7 @@ app.get("/usuarios", async (req, res) => {
 app.get("/clientes", async (req, res) => {
   try {
     const query = "SELECT * FROM clientes";
-    const [rows] = await db.query(query);
+    const [rows] = await db.client.query(query);
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
@@ -109,7 +109,7 @@ app.get("/usuarios/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const query = "SELECT * FROM usuarios WHERE id = ?";
-    const [rows] = await db.query(query, [id]);
+    const [rows] = await db.client.query(query, [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
@@ -129,7 +129,7 @@ app.post("/ordenes", async (req, res) => {
 
   try {
     const query = `INSERT INTO orden_trabajo (id_cliente, id_usuario, importancia, descripcion,estado) VALUES (?,?, ?, ?, ?)`;
-    const [resultado] = await db.query(query, [
+    const [resultado] = await db.client.query(query, [
       id_cliente,
       id_usuario,
       importancia,
@@ -164,7 +164,7 @@ app.get("/ordenes", async (req, res) => {
             JOIN usuarios u ON ot.id_usuario = u.id
             ORDER BY ot.creacion DESC;
         `;
-    const [ordenes] = await db.query(query);
+    const [ordenes] = await db.client.query(query);
     res.json(ordenes);
   } catch (error) {
     console.error(error);
@@ -194,7 +194,7 @@ app.post("/reclamos", async (req, res) => {
   }
 
   try {
-    const [orden] = await db.query("SELECT * FROM orden_trabajo WHERE id = ?", [
+    const [orden] = await db.client.query("SELECT * FROM orden_trabajo WHERE id = ?", [
       ordenTrabajo_id,
     ]);
     if (orden.length === 0) {
@@ -206,7 +206,7 @@ app.post("/reclamos", async (req, res) => {
           INSERT INTO reclamos (usuario_id, ordenTrabajo_id, titulo, descripcion, importancia, estado)
           VALUES (?, ?, ?, ?, ?, ?)
         `;
-    const [resultado] = await db.query(query, [
+    const [resultado] = await db.client.query(query, [
       usuario_id,
       ordenTrabajo_id,
       titulo,
@@ -228,7 +228,7 @@ app.post("/reclamos", async (req, res) => {
 
 app.get("/api/clientes", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM clientes");
+    const [rows] = await db.client.query("SELECT * FROM clientes");
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -238,7 +238,7 @@ app.get("/api/clientes", async (req, res) => {
 
 app.get("/api/usuarios", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM usuarios");
+    const [rows] = await db.client.query("SELECT * FROM usuarios");
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -248,7 +248,7 @@ app.get("/api/usuarios", async (req, res) => {
 
 app.get("/api/ordenesTrabajo", async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.client.query(`
       SELECT ot.id, ot.descripcion, c.empresa AS empresa
       FROM orden_trabajo ot
       JOIN clientes c ON ot.id_cliente = c.id
@@ -262,7 +262,7 @@ app.get("/api/ordenesTrabajo", async (req, res) => {
 
 app.get("/api/reclamos", async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.client.query(`
       SELECT r.id, r.titulo, r.descripcion AS reclamo_descripcion, 
        r.importancia, r.estado,
        u.nombre AS usuario_nombre, 
@@ -289,7 +289,7 @@ app.post("/clientes", async (req, res) => {
   }
  try {
   const query = `INSERT INTO clientes (nombre, empresa, email, telefono, localidad, provincia, direccion) VALUES (?,?,?,?,?,?,?)`
-  const [resultado] = await db.query(query, [
+  const [resultado] = await db.client.query(query, [
     nombre,
     empresa,
     email,
@@ -595,161 +595,6 @@ app.post("/clientes", async (req, res) => {
     res.status(500).json({ error: "Error al crear el cliente" });
   }
 });
-
-/* Presupuesto */
-app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { productos, servicios, accesorios } = req.body;  // Datos de productos, servicios y accesorios
-  if (!productos && !servicios && !accesorios) {
-    return res.status(400).json({ error: "Debe incluir al menos un producto, servicio o accesorio" });
-  }
-
-  try {
-    // Paso 1: Insertar el presupuesto (resumen general)
-    let total = 0;
-    let productosText = "";
-    let serviciosText = "";
-    let accesoriosText = "";
-
-    // Insertar productos
-    if (productos) {
-      for (const producto of productos) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio FROM producto WHERE id = ?",
-          args: [producto.id]
-        });
-        if (result.rows.length > 0) {
-          const precioProducto = result.rows[0].precio;
-          total += precioProducto * producto.cantidad;
-          productosText += `${producto.nombre}, `;
-        }
-      }
-    }s
-
-    // Insertar servicios
-    if (servicios) {
-      for (const servicio of servicios) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio_por_hora FROM servicio WHERE id = ?",
-          args: [servicio.id]
-        });
-        if (result.rows.length > 0) {
-          const precioServicio = result.rows[0].precio_por_hora;
-          total += precioServicio * servicio.horas;
-          serviciosText += `${servicio.nombre}, `;
-        }
-      }
-    }
-
-    // Insertar accesorios
-    if (accesorios) {
-      for (const accesorio of accesorios) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio FROM accesorio WHERE id = ?",
-          args: [accesorio.id]
-        });
-        if (result.rows.length > 0) {
-          const precioAccesorio = result.rows[0].precio;
-          total += precioAccesorio * accesorio.cantidad;
-          accesoriosText += `${accesorio.nombre}, `;
-        }
-      }
-    }
-
-    // Crear el presupuesto en la tabla `presupuesto`
-    const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (total, productos, servicios, accesorios) VALUES (?, ?, ?, ?)",
-      args: [total, productosText, serviciosText, accesoriosText]
-    });
-
-    // Obtener el ID del presupuesto insertado
-    const presupuestoId = resultPresupuesto.lastInsertRowid;
-
-    // Paso 2: Insertar detalles en `presupuesto_detalle`
-    if (productos) {
-      for (const producto of productos) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'producto', ?, ?, ?, ?)",
-          args: [presupuestoId, producto.id, producto.nombre, producto.cantidad, producto.precio * producto.cantidad]
-        });
-      }
-    }
-
-    if (servicios) {
-      for (const servicio of servicios) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'servicio', ?, ?, ?, ?)",
-          args: [presupuestoId, servicio.id, servicio.nombre, servicio.horas, servicio.precio_por_hora * servicio.horas]
-        });
-      }
-    }
-
-    if (accesorios) {
-      for (const accesorio of accesorios) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'accesorio', ?, ?, ?, ?)",
-          args: [presupuestoId, accesorio.id, accesorio.nombre, accesorio.cantidad, accesorio.precio * accesorio.cantidad]
-        });
-      }
-    }
-
-    // Devolver la respuesta con el ID del presupuesto creado
-    res.status(201).json({ presupuestoId, total, message: "Presupuesto creado exitosamente" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al crear el presupuesto" });
-  }
-});
-
-app.get("/presupuestos", async (req, res) => {
-  try {
-    const result = await db.presupuesto.execute("SELECT * FROM presupuesto");
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los presupuestos" });
-  }
-});
-
-app.get("/productos",async (req, res) => {
-  try {
-    const result = await db.presupuesto.execute("SELECT * FROM productos");
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los presupuestos" });
-  }
-})
-
-app.get("/servicios",async (req, res) => {
-  try {
-    const result = await db.presupuesto.execute("SELECT * FROM servicios");
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los presupuestos" });
-  }
-})
-
-app.get("/accesorios",async (req, res) => {
-  try {
-    const result = await db.presupuesto.execute("SELECT * FROM accesorios");
-    res.status(200).json(result.rows);
-  } catch (error) {
-
-app.get("/presupuestos/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await db.presupuesto.execute({
-      sql: `SELECT * FROM presupuesto_detalle WHERE presupuesto_id = ?`,
-      args: [id]
-    });
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los detalles del presupuesto" });
-  }
-});
-
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
