@@ -9,6 +9,7 @@ import RegistroUsuarios from "../components/RegistroUsuarios";
 import OrdenTrabajo from "../components/OrdenTrabajo";
 import FormularioReclamos from "../components/FormularioReclamos";
 import Login from "../components/Login";
+import CrearPresupuesto from "../components/CrearPresupuesto";
 import Reclamos from "../components/Reclamos";
 import RegistrarCliente from "../components/RegistrarCliente";
 import FormularioOrden from "../components/formularioOrden";
@@ -78,6 +79,7 @@ function App() {
         <Route path="/registrar-reclamo" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioReclamos /></RutaProtegida>} />
         <Route path="/registrar-orden" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioOrden /></RutaProtegida>} />
         <Route path="/registrar-clientes" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
+        <Route path="/crear-producto" element={<CrearPresupuesto/>} />
       </Routes>
     </Router>
   );
