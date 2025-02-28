@@ -726,6 +726,35 @@ app.get("/presupuestos/:id", async (req, res) => {
   }
 });
 
+app.get("/productos", async (req, res) => {  
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM producto");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los productos" });
+  }
+});
+
+app.get("/servicios", async (req, res) => {
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM servicio");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los servicios" });
+  }
+});
+
+app.get("/accesorios", async (req, res) => {
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM accesorio");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los accesorios" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
