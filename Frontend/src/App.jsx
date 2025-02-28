@@ -79,7 +79,7 @@ function App() {
         <Route path="/registrar-reclamo" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioReclamos /></RutaProtegida>} />
         <Route path="/registrar-orden" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioOrden /></RutaProtegida>} />
         <Route path="/registrar-clientes" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
-        <Route path="/crear-producto" element={<CrearPresupuesto/>} />
+        <Route path="/crear-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}> <CrearPresupuesto/></RutaProtegida>}/>
       </Routes>
     </Router>
   );
