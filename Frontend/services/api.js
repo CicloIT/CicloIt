@@ -196,3 +196,107 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
+
+  /*Presupuesto */
+  export const obtenerProductos = async () => {
+    try {
+      const response = await fetch(`${API_URL}/productos`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al obtener los productos');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+  
+  export const obtenerServicios = async () => {
+    try {
+      const response = await fetch(`${API_URL}/servicios`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al obtener los servicios');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  export const obtenerAccesorios = async () => {
+    try {
+      const response = await fetch(`${API_URL}/accesorios`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al obtener los accesorios');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  export const registrarPresupuesto = async (data) => {
+    try {
+      const response = await fetch(`${API_URL}/presupuestos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify(data)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al crear el presupuesto');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  export const obtenerPresupuestos = async () => {
+    try {
+      const response = await fetch(`${API_URL}/presupuestos`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al obtener los presupuestos');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+  

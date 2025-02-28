@@ -2,24 +2,18 @@ import dotenv from 'dotenv';
 import { createClient } from '@libsql/client';
 
 dotenv.config();
-// Configura el cliente
+
+// Configura el cliente para productos, servicios y accesorios
 const client = createClient({
   url: 'libsql://cicloit-samuelnar.turso.io',   
-  authToken: process.env.DB_TOKEN,  // Reemplaza con tu token de autenticación
+  authToken: process.env.DB_TOKEN,  // Token de autenticación para la base de datos de productos, servicios, etc.
 });
 
-/*import mysql from 'mysql2';
-dotenv.config();
-const connection = mysql.createPool({
-    host: process.env.DB_HOSTURSO,
-    password: process.env.DB_TOKEN,
-    user: 'samuelnar',
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+// Configura el cliente para presupuestos
+const presupuesto = createClient({
+  url: 'libsql://presupuesto-samuelnar.turso.io',
+  authToken: process.env.DB_TOKEN_PRESUPUESTO  // Token de autenticación para la base de datos de presupuestos
 });
 
-export default connection.promise();
-*/
-export default client;
+// Exportamos ambas conexiones para su uso en otros archivos
+export default { client, presupuesto };
