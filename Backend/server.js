@@ -710,6 +710,32 @@ app.get("/presupuestos", async (req, res) => {
   }
 });
 
+app.get("/productos",async (req, res) => {
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM productos");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los presupuestos" });
+  }
+})
+
+app.get("/servicios",async (req, res) => {
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM servicios");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los presupuestos" });
+  }
+})
+
+app.get("/accesorios",async (req, res) => {
+  try {
+    const result = await db.presupuesto.execute("SELECT * FROM accesorios");
+    res.status(200).json(result.rows);
+  } catch (error) {
+
 app.get("/presupuestos/:id", async (req, res) => {
   const { id } = req.params;
   try {
