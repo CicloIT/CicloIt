@@ -701,6 +701,32 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
   }
 });
 
+app.get("/presupuestos", async (req, res) => {
+  try {
+    const result = await presupuesto.execute("SELECT * FROM presupuesto");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los presupuestos" });
+  }
+});
+
+
+app.get("/presupuestos/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await presupuesto.execute({
+      sql: `SELECT * FROM presupuesto_detalle WHERE presupuesto_id = ?`,
+      args: [id]
+    });
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los detalles del presupuesto" });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });
