@@ -696,16 +696,6 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
   }
 });
 
-app.get("/presupuestos", async (req, res) => {
-  try {
-    const result = await presupuesto.execute("SELECT * FROM presupuesto");
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los presupuestos" });
-  }
-});
-
 
 app.get("/presupuestos", verificarToken, async (req, res) => {
   try {
