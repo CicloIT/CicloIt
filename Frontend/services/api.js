@@ -283,7 +283,7 @@ export const registrarReclamo = async (data) => {
 
   export const obtenerPresupuestos = async () => {
     try {
-      const response = await fetch(`${API_URL}/presupuesto`, {
+      const response = await fetch(`${API_URL}/presupuestos`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${getToken()}`
