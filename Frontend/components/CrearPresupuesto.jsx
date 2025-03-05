@@ -12,6 +12,7 @@ function CrearPresupuesto() {
   const [selectedProductos, setSelectedProductos] = useState([]);
   const [selectedServicios, setSelectedServicios] = useState([]);
   const [selectedAccesorios, setSelectedAccesorios] = useState([]);
+  const [servicioHoras, setServicioHoras] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -41,7 +42,9 @@ function CrearPresupuesto() {
     });
 
     selectedServicios.forEach(serv => {
-      totalTemp += (serv.precio_por_hora || 0) * (serv.horas || 1);
+      // Usar el objeto servicioHoras para obtener las horas
+      const horas = servicioHoras[serv.id] || 1;
+      totalTemp += (serv.precio_por_hora || 0) * horas;
     });
 
     selectedAccesorios.forEach(accesorio => {
@@ -49,26 +52,39 @@ function CrearPresupuesto() {
     });
 
     return totalTemp;
-  }, [selectedProductos, selectedServicios, selectedAccesorios]);
+  }, [selectedProductos, selectedServicios, selectedAccesorios, servicioHoras]);
 
   useEffect(() => {
-    // Asegúrate de que total siempre sea un número real
     setTotal(Number(calcularTotal) || 0);
   }, [calcularTotal]);
 
   const handleServicioChange = (e) => {
     const selectedOptions = [...e.target.selectedOptions].map(option => {
       const servicio = servicios.find(serv => serv.id === parseInt(option.value));
-      return { ...servicio, horas: 1 }; // Por defecto, 1 hora
+      return servicio;
     });
+    
+    // Crear un nuevo objeto de horas para los servicios seleccionados
+    const nuevasHoras = {};
+    selectedOptions.forEach(serv => {
+      nuevasHoras[serv.id] = 1; // Valor por defecto de 1 hora
+    });
+
     setSelectedServicios(selectedOptions);
+    setServicioHoras(prevHoras => ({
+      ...prevHoras,
+      ...nuevasHoras
+    }));
   };
 
   const handleHorasChange = (id, horas) => {
-    if (isNaN(horas)) return; // Evita valores no numéricos
-    setSelectedServicios(prev =>
-      prev.map(serv => (serv.id === id ? { ...serv, horas } : serv))
-    );
+    if (isNaN(horas)) return;
+    
+    // Actualizar el objeto de horas
+    setServicioHoras(prev => ({
+      ...prev,
+      [id]: horas
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -76,12 +92,18 @@ function CrearPresupuesto() {
     setLoading(true);
     setError(null);
 
+    // Preparar los servicios con la información de horas
+    const serviciosConHoras = selectedServicios.map(serv => ({
+      ...serv,
+      horas: servicioHoras[serv.id] || 1
+    }));
+
     const data = {
       nombreCliente,
       descripcion,
       total,
       productos: selectedProductos,
-      servicios: selectedServicios,
+      servicios: serviciosConHoras,
       accesorios: selectedAccesorios
     };
 

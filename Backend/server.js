@@ -599,7 +599,7 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios } = req.body;
+  const { nombreCliente, descripcion, productos, servicios, accesorios, total } = req.body;
 
   // Validación para asegurarse de que se haya seleccionado al menos un producto, servicio o accesorio
   if (!productos.length && !servicios.length && !accesorios.length) {
@@ -611,65 +611,37 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     let productosText = "";
     let serviciosText = "";
     let accesoriosText = "";
-    let total = 0;  // Cambiado a let para permitir la modificación
 
-    // Paso 1: Construir las cadenas de texto y calcular el total para los productos
+    // Paso 1: Construir las cadenas de texto para los productos
     if (productos && productos.length > 0) {
       for (const producto of productos) {
-        const precio = parseFloat(producto.precio);
-        const cantidad = parseInt(producto.cantidad);
-
-        // Validar que el precio y cantidad sean números válidos
-        if (isNaN(precio) || isNaN(cantidad) || !isFinite(precio) || !isFinite(cantidad)) {
-          return res.status(400).json({ error: `Precio o cantidad inválida para el producto ${producto.nombre}` });
-        }
-
-        productosText += `${producto.nombre} (${cantidad} x $${precio}), `;
-        total += precio * cantidad;
+        // Asumir cantidad 1 si no se especifica
+        const cantidad = 1;
+        productosText += `${producto.nombre} (${cantidad} x $${producto.precio}), `;
       }
     }
 
-    // Paso 2: Construir las cadenas de texto y calcular el total para los servicios
+    // Paso 2: Construir las cadenas de texto para los servicios
     if (servicios && servicios.length > 0) {
       for (const servicio of servicios) {
-        const precioPorHora = parseFloat(servicio.precio_por_hora);
-        const horas = parseInt(servicio.horas);
-
-        // Validar que el precio por hora y las horas sean números válidos
-        if (isNaN(precioPorHora) || isNaN(horas) || !isFinite(precioPorHora) || !isFinite(horas)) {
-          return res.status(400).json({ error: `Precio por hora o horas inválidas para el servicio ${servicio.nombre}` });
-        }
-
-        serviciosText += `${servicio.nombre} (${horas} horas a $${precioPorHora}/hora), `;
-        total += precioPorHora * horas;
+        const horas = servicio.horas || 1;
+        serviciosText += `${servicio.nombre} (${horas} horas a $${servicio.precio_por_hora}/hora), `;
       }
     }
 
-    // Paso 3: Construir las cadenas de texto y calcular el total para los accesorios
+    // Paso 3: Construir las cadenas de texto para los accesorios
     if (accesorios && accesorios.length > 0) {
       for (const accesorio of accesorios) {
-        const precio = parseFloat(accesorio.precio);
-        const cantidad = parseInt(accesorio.cantidad);
-
-        // Validar que el precio y cantidad sean números válidos
-        if (isNaN(precio) || isNaN(cantidad) || !isFinite(precio) || !isFinite(cantidad)) {
-          return res.status(400).json({ error: `Precio o cantidad inválida para el accesorio ${accesorio.nombre}` });
-        }
-
-        accesoriosText += `${accesorio.nombre} (${cantidad} x $${precio}), `;
-        total += precio * cantidad;
+        // Asumir cantidad 1 si no se especifica
+        const cantidad = 1;
+        accesoriosText += `${accesorio.nombre} (${cantidad} x $${accesorio.precio}), `;
       }
-    }
-    
-    // Validación del total final
-    if (isNaN(total) || !isFinite(total)) {
-      return res.status(400).json({ error: "Total es inválido" });
     }
 
     // Eliminar la coma y el espacio extra al final de cada cadena
-    productosText = productosText.slice(0, -2);
-    serviciosText = serviciosText.slice(0, -2);
-    accesoriosText = accesoriosText.slice(0, -2);
+    productosText = productosText ? productosText.slice(0, -2) : "";
+    serviciosText = serviciosText ? serviciosText.slice(0, -2) : "";
+    accesoriosText = accesoriosText ? accesoriosText.slice(0, -2) : "";
 
     console.log("Datos recibidos en el backend:", req.body);
 
@@ -685,10 +657,15 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     // Paso 5: Insertar los detalles de cada ítem en la tabla `presupuesto_detalle`
     const insertarDetalles = async (items, tipo) => {
       for (const item of items) {
-        const subtotal = parseFloat(item.precio) * (item.cantidad || item.horas);
+        // Para servicios, usar horas. Para otros, asumir cantidad 1
+        const cantidad = item.horas || 1;
+        const subtotal = tipo === 'servicio' 
+          ? parseFloat(item.precio_por_hora) * cantidad 
+          : parseFloat(item.precio) * cantidad;
+
         await db.presupuesto.execute({
           sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
-          args: [presupuestoId, tipo, item.id, item.nombre, item.cantidad || item.horas, subtotal]
+          args: [presupuestoId, tipo, item.id, item.nombre, cantidad, subtotal]
         });
       }
     };
@@ -698,15 +675,14 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     if (servicios.length > 0) await insertarDetalles(servicios, "servicio");
     if (accesorios.length > 0) await insertarDetalles(accesorios, "accesorio");
 
-    // Devolver la respuesta con el ID del presupuesto creado y el total calculado
+    // Devolver la respuesta con el ID del presupuesto creado
     res.status(201).json({ presupuestoId, total, message: "Presupuesto creado exitosamente" });
 
   } catch (error) {
-    console.error("Error al crear presupuesto:", error); // Log para ver detalles del error
+    console.error("Error al crear presupuesto:", error);
     res.status(500).json({ error: "Error al crear el presupuesto", details: error.message });
   }
 });
-
 
 
 app.get("/presupuestos", async (req, res) => {
