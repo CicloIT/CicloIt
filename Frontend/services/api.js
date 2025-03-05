@@ -300,4 +300,3 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
-  

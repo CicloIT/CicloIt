@@ -14,6 +14,7 @@ import Reclamos from "../components/Reclamos";
 import RegistrarCliente from "../components/RegistrarCliente";
 import FormularioOrden from "../components/formularioOrden";
 import Navbar from "../components/NavBar/NavBar";
+import ListaPresupuestos from "../components/ListaPresupuestos";
 
 const Inicio = () => {
   return (
@@ -80,6 +81,7 @@ function App() {
         <Route path="/registrar-orden" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioOrden /></RutaProtegida>} />
         <Route path="/registrar-clientes" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
         <Route path="/crear-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}> <CrearPresupuesto/></RutaProtegida>}/>
+        <Route path="/ver-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}><ListaPresupuestos /> </RutaProtegida>} />
       </Routes>
     </Router>
   );
