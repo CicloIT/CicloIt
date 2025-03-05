@@ -35,7 +35,7 @@ function CrearPresupuesto() {
 
   const calcularTotal = useMemo(() => {
     let totalTemp = 0;
-    
+
     selectedProductos.forEach(producto => {
       totalTemp += producto.precio || 0;
     });
@@ -52,7 +52,8 @@ function CrearPresupuesto() {
   }, [selectedProductos, selectedServicios, selectedAccesorios]);
 
   useEffect(() => {
-    setTotal(calcularTotal);
+    // Asegúrate de que total siempre sea un número real
+    setTotal(Number(calcularTotal) || 0);
   }, [calcularTotal]);
 
   const handleServicioChange = (e) => {
@@ -83,7 +84,6 @@ function CrearPresupuesto() {
       servicios: selectedServicios,
       accesorios: selectedAccesorios
     };
-
 
     console.log("Datos enviados al backend:", data);
     

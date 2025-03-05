@@ -616,25 +616,54 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     // Paso 1: Construir las cadenas de texto y calcular el total para los productos
     if (productos && productos.length > 0) {
       for (const producto of productos) {
-        productosText += `${producto.nombre} (${producto.cantidad} x $${producto.precio}), `;
-        total += producto.precio * producto.cantidad;
+        const precio = parseFloat(producto.precio);
+        const cantidad = parseInt(producto.cantidad);
+
+        // Validar que el precio y cantidad sean números válidos
+        if (isNaN(precio) || isNaN(cantidad) || !isFinite(precio) || !isFinite(cantidad)) {
+          return res.status(400).json({ error: `Precio o cantidad inválida para el producto ${producto.nombre}` });
+        }
+
+        productosText += `${producto.nombre} (${cantidad} x $${precio}), `;
+        total += precio * cantidad;
       }
     }
 
     // Paso 2: Construir las cadenas de texto y calcular el total para los servicios
     if (servicios && servicios.length > 0) {
       for (const servicio of servicios) {
-        serviciosText += `${servicio.nombre} (${servicio.horas} horas a $${servicio.precio_por_hora}/hora), `;
-        total += servicio.precio_por_hora * servicio.horas;
+        const precioPorHora = parseFloat(servicio.precio_por_hora);
+        const horas = parseInt(servicio.horas);
+
+        // Validar que el precio por hora y las horas sean números válidos
+        if (isNaN(precioPorHora) || isNaN(horas) || !isFinite(precioPorHora) || !isFinite(horas)) {
+          return res.status(400).json({ error: `Precio por hora o horas inválidas para el servicio ${servicio.nombre}` });
+        }
+
+        serviciosText += `${servicio.nombre} (${horas} horas a $${precioPorHora}/hora), `;
+        total += precioPorHora * horas;
       }
     }
 
     // Paso 3: Construir las cadenas de texto y calcular el total para los accesorios
     if (accesorios && accesorios.length > 0) {
       for (const accesorio of accesorios) {
-        accesoriosText += `${accesorio.nombre} (${accesorio.cantidad} x $${accesorio.precio}), `;
-        total += accesorio.precio * accesorio.cantidad;
+        const precio = parseFloat(accesorio.precio);
+        const cantidad = parseInt(accesorio.cantidad);
+
+        // Validar que el precio y cantidad sean números válidos
+        if (isNaN(precio) || isNaN(cantidad) || !isFinite(precio) || !isFinite(cantidad)) {
+          return res.status(400).json({ error: `Precio o cantidad inválida para el accesorio ${accesorio.nombre}` });
+        }
+
+        accesoriosText += `${accesorio.nombre} (${cantidad} x $${precio}), `;
+        total += precio * cantidad;
       }
+    }
+    
+    // Validación del total final
+    if (isNaN(total) || !isFinite(total)) {
+      return res.status(400).json({ error: "Total es inválido" });
     }
 
     // Eliminar la coma y el espacio extra al final de cada cadena
@@ -656,9 +685,10 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     // Paso 5: Insertar los detalles de cada ítem en la tabla `presupuesto_detalle`
     const insertarDetalles = async (items, tipo) => {
       for (const item of items) {
+        const subtotal = parseFloat(item.precio) * (item.cantidad || item.horas);
         await db.presupuesto.execute({
           sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
-          args: [presupuestoId, tipo, item.id, item.nombre, item.cantidad || item.horas, item.subtotal]
+          args: [presupuestoId, tipo, item.id, item.nombre, item.cantidad || item.horas, subtotal]
         });
       }
     };
@@ -676,6 +706,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     res.status(500).json({ error: "Error al crear el presupuesto", details: error.message });
   }
 });
+
 
 
 app.get("/presupuestos", async (req, res) => {
