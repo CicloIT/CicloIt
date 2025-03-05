@@ -64,8 +64,9 @@ function CrearPresupuesto() {
   };
 
   const handleHorasChange = (id, horas) => {
+    if (isNaN(horas)) return; // Evita valores no numéricos
     setSelectedServicios(prev =>
-      prev.map(serv => (serv.id === id ? { ...serv, horas: horas } : serv))
+      prev.map(serv => (serv.id === id ? { ...serv, horas } : serv))
     );
   };
 
@@ -83,6 +84,9 @@ function CrearPresupuesto() {
       accesorios: selectedAccesorios
     };
 
+
+    console.log("Datos enviados al backend:", data);
+    
     try {
       await registrarPresupuesto(data);
       navigate('/');
