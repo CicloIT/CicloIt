@@ -599,22 +599,59 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, total, productos, servicios, accesorios } = req.body;
+  const { nombreCliente, descripcion, productos, servicios, accesorios } = req.body;
 
+  // Validación para asegurarse de que se haya seleccionado al menos un producto, servicio o accesorio
   if (!productos.length && !servicios.length && !accesorios.length) {
     return res.status(400).json({ error: "Debe incluir al menos un producto, servicio o accesorio" });
   }
 
   try {
-    // Insertar el presupuesto en la tabla `presupuesto`
+    // Variables para construir las cadenas de texto de productos, servicios y accesorios
+    let productosText = "";
+    let serviciosText = "";
+    let accesoriosText = "";
+    let total = 0;
+
+    // Paso 1: Construir las cadenas de texto y calcular el total para los productos
+    if (productos) {
+      for (const producto of productos) {
+        productosText += `${producto.nombre} (${producto.cantidad} x $${producto.precio}), `;
+        total += producto.precio * producto.cantidad;
+      }
+    }
+
+    // Paso 2: Construir las cadenas de texto y calcular el total para los servicios
+    if (servicios) {
+      for (const servicio of servicios) {
+        serviciosText += `${servicio.nombre} (${servicio.horas} horas a $${servicio.precio_por_hora}/hora), `;
+        total += servicio.precio_por_hora * servicio.horas;
+      }
+    }
+
+    // Paso 3: Construir las cadenas de texto y calcular el total para los accesorios
+    if (accesorios) {
+      for (const accesorio of accesorios) {
+        accesoriosText += `${accesorio.nombre} (${accesorio.cantidad} x $${accesorio.precio}), `;
+        total += accesorio.precio * accesorio.cantidad;
+      }
+    }
+
+    // Eliminar la coma y el espacio extra al final de cada cadena
+    productosText = productosText.slice(0, -2);
+    serviciosText = serviciosText.slice(0, -2);
+    accesoriosText = accesoriosText.slice(0, -2);
+
+    // Paso 4: Insertar el presupuesto en la tabla `presupuesto` con la descripción, productos, servicios y accesorios como texto
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, total) VALUES (?, ?, ?)",
-      args: [nombreCliente, descripcion, total]
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?)",
+      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, total]
     });
 
+    // Obtener el ID del presupuesto insertado
     const presupuestoId = resultPresupuesto.lastInsertRowid;
 
-    // Insertar detalles en `presupuesto_detalle`
+    // Paso 5: Insertar los detalles de cada ítem en la tabla `presupuesto_detalle`
     const insertarDetalles = async (items, tipo) => {
       for (const item of items) {
         await db.presupuesto.execute({
@@ -624,11 +661,14 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
       }
     };
 
+    // Insertar detalles para productos, servicios y accesorios
     await insertarDetalles(productos, "producto");
     await insertarDetalles(servicios, "servicio");
     await insertarDetalles(accesorios, "accesorio");
 
+    // Devolver la respuesta con el ID del presupuesto creado y el total calculado
     res.status(201).json({ presupuestoId, total, message: "Presupuesto creado exitosamente" });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al crear el presupuesto" });
