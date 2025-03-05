@@ -270,7 +270,8 @@ export const registrarReclamo = async (data) => {
       });
   
       if (!response.ok) {
-        throw new Error('Error al crear el presupuesto');
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error desconocido");
       }
   
       return await response.json();

@@ -599,19 +599,20 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios } = req.body;
+  const { nombreCliente, descripcion, total,productos, servicios, accesorios } = req.body;
 
   // Validación para asegurarse de que se haya seleccionado al menos un producto, servicio o accesorio
   if (!productos.length && !servicios.length && !accesorios.length) {
     return res.status(400).json({ error: "Debe incluir al menos un producto, servicio o accesorio" });
   }
+ 
 
   try {
     // Variables para construir las cadenas de texto de productos, servicios y accesorios
     let productosText = "";
     let serviciosText = "";
     let accesoriosText = "";
-    let total = 0;
+    total = 0;
 
     // Paso 1: Construir las cadenas de texto y calcular el total para los productos
     if (productos) {
@@ -642,6 +643,8 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     serviciosText = serviciosText.slice(0, -2);
     accesoriosText = accesoriosText.slice(0, -2);
 
+    console.log("Datos recibidos en el backend:", req.body); 
+
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto` con la descripción, productos, servicios y accesorios como texto
     const resultPresupuesto = await db.presupuesto.execute({
       sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?)",
@@ -670,8 +673,8 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     res.status(201).json({ presupuestoId, total, message: "Presupuesto creado exitosamente" });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al crear el presupuesto" });
+    console.error("Error al crear presupuesto:", error); // Log para ver detalles del error
+    res.status(500).json({ error: "Error al crear el presupuesto", details: error.message });
   }
 });
 
