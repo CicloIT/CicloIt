@@ -701,7 +701,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 app.get("/presupuestos", verificarToken, async (req, res) => {
   try {
     // Obtener todos los presupuestos ordenados por fecha de creación (más recientes primero)
-    const result = await db.presupuesto.execute("SELECT * FROM presupuesto ORDER BY fecha_creacion DESC");
+    const result = await db.presupuesto.execute("SELECT * FROM presupuesto ORDER BY fecha DESC");
     console.log(result);
     console.log("row",result.rows);
     // Verificar si hay resultados
