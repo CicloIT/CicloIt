@@ -14,19 +14,17 @@ function ListaPresupuestos() {
         setLoading(true);
         const datos = await obtenerPresupuestos();
         
-        // Log para verificar los datos obtenidos
-        console.log("Datos obtenidos de la API:", datos);
-    
-        // Manejar el caso en que los datos estén vacíos
-        if (Array.isArray(datos)) {
+        // Si la respuesta es un arreglo vacío, no hacemos nada
+        if (Array.isArray(datos) && datos.length > 0) {
           setPresupuestos(datos);
           setError(null);
         } else {
-          setError('Formato de respuesta incorrecto');
+          setPresupuestos([]);  // No hay presupuestos, dejamos el arreglo vacío
+          setError('No hay presupuestos disponibles');
         }
       } catch (err) {
-        console.error('Error al cargar presupuestos:', err);
-        setError('No se pudieron cargar los presupuestos o sesión expirada');
+        console.error('Error al cargar presupuestos front:', err);
+        setError('No se pudieron cargar los presupuestos front');
       } finally {
         setLoading(false);
       }
@@ -53,7 +51,7 @@ function ListaPresupuestos() {
       <h2 className="text-2xl font-semibold text-center mb-6">Listado de Presupuestos</h2>
       
       {presupuestos.length === 0 ? (
-        <div className="text-center text-gray-500">No hay presupuestos registrados</div>
+        <div className="text-center text-gray-500">{error || 'No hay presupuestos registrados'}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">

@@ -280,37 +280,39 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
+
   export const obtenerPresupuestos = async () => {
     const token = getToken();  // Obtener el token del almacenamiento local o de donde lo tengas
-
-  // Si no hay token, lanzamos un error
-  if (!token) {
-    throw new Error('Token no disponible');
-  }
+  
+    // Si no hay token, lanzamos un error
+    if (!token) {
+      throw new Error('Token no disponible');
+    }
   
     try {
       const response = await fetch(`${API_URL}/presupuestos`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${getToken()}`
+          'Authorization': `Bearer ${token}`,  // Incluir el token en la cabecera
         }
       });
   
       if (!response.ok) {
-        throw new Error('Error al obtener los presupuestos');
+        throw new Error('Error al obtener los presupuestos api.js');
       }
   
       const data = await response.json();
-      
-      // Verificación de la respuesta para asegurarse de que sea un arreglo
+  
+      // Verificación si la respuesta es un arreglo o vacío
       if (Array.isArray(data)) {
-        return data;
+        return data;  // Si es un arreglo, retornamos los presupuestos
       } else {
-        throw new Error('Datos recibidos no son un arreglo');
+        throw new Error('Datos recibidos no son un arreglo válido');
       }
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
+  
   
