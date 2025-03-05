@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { registrarPresupuesto, obtenerProductos, obtenerServicios, obtenerAccesorios } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 function CrearPresupuesto() {
   const [nombreCliente, setNombreCliente] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [total, setTotal] = useState('');
+  const [total, setTotal] = useState(0);
   const [productos, setProductos] = useState([]);
-  const [servicio, setServicio] = useState([]);
+  const [servicios, setServicios] = useState([]);
   const [accesorios, setAccesorios] = useState([]);
+  const [selectedProductos, setSelectedProductos] = useState([]);
+  const [selectedServicios, setSelectedServicios] = useState([]);
+  const [selectedAccesorios, setSelectedAccesorios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -20,16 +23,51 @@ function CrearPresupuesto() {
         const serviciosData = await obtenerServicios();
         const accesoriosData = await obtenerAccesorios();
         setProductos(productosData);
-        setServicio(serviciosData);
+        setServicios(serviciosData);
         setAccesorios(accesoriosData);
       } catch (err) {
         setError('Error al cargar los datos');
         console.error(err);
       }
     };
-
     fetchData();
   }, []);
+
+  const calcularTotal = useMemo(() => {
+    let totalTemp = 0;
+    
+    selectedProductos.forEach(producto => {
+      totalTemp += producto.precio || 0;
+    });
+
+    selectedServicios.forEach(serv => {
+      totalTemp += (serv.precio_por_hora || 0) * (serv.horas || 1);
+    });
+
+    selectedAccesorios.forEach(accesorio => {
+      totalTemp += accesorio.precio || 0;
+    });
+
+    return totalTemp;
+  }, [selectedProductos, selectedServicios, selectedAccesorios]);
+
+  useEffect(() => {
+    setTotal(calcularTotal);
+  }, [calcularTotal]);
+
+  const handleServicioChange = (e) => {
+    const selectedOptions = [...e.target.selectedOptions].map(option => {
+      const servicio = servicios.find(serv => serv.id === parseInt(option.value));
+      return { ...servicio, horas: 1 }; // Por defecto, 1 hora
+    });
+    setSelectedServicios(selectedOptions);
+  };
+
+  const handleHorasChange = (id, horas) => {
+    setSelectedServicios(prev =>
+      prev.map(serv => (serv.id === id ? { ...serv, horas: horas } : serv))
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,18 +78,17 @@ function CrearPresupuesto() {
       nombreCliente,
       descripcion,
       total,
-      productos,
-      servicio,
-      accesorios
+      productos: selectedProductos,
+      servicios: selectedServicios,
+      accesorios: selectedAccesorios
     };
 
     try {
-      const response = await registrarPresupuesto(data);
-      console.log('Presupuesto creado:', response);
+      await registrarPresupuesto(data);
       navigate('/');
     } catch (err) {
       setError('Error al crear el presupuesto');
-      console.error('Error al crear el presupuesto:', err);
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
@@ -82,60 +119,76 @@ function CrearPresupuesto() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Monto:</label>
+          <label className="block text-sm font-medium text-gray-700">Monto Total:</label>
           <input
             type="number"
             value={total}
-            onChange={(e) => setTotal(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
+            disabled
+            className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
+        
+        {/* Productos */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Productos:</label>
           <select
             multiple
-            value={productos}
-            onChange={(e) => setProductos([...e.target.selectedOptions].map(option => option.value))}
+            onChange={(e) => setSelectedProductos([...e.target.selectedOptions].map(option => productos.find(p => p.id === parseInt(option.value))))}
             className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
           >
-            {productos.map((producto) => (
-              <option key={producto.id} value={producto.nombre}>
+            {productos.map(producto => (
+              <option key={producto.id} value={producto.id}>
                 {producto.nombre} - ${producto.precio}
               </option>
             ))}
           </select>
         </div>
+
+        {/* Servicios con selección de horas */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Servicios:</label>
           <select
             multiple
-            value={servicio}
-            onChange={(e) => setServicio([...e.target.selectedOptions].map(option => option.value))}
+            onChange={handleServicioChange}
             className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
           >
-            {servicio.map((serv) => (
-              <option key={serv.id} value={serv.nombre}>
-                {serv.nombre} - ${serv.precio}
+            {servicios.map(servicio => (
+              <option key={servicio.id} value={servicio.id}>
+                {servicio.nombre} - ${servicio.precio_por_hora} /hora
               </option>
             ))}
           </select>
+          {selectedServicios.map(serv => (
+            <div key={serv.id} className="flex items-center mt-2 space-x-2">
+              <span>{serv.nombre}:</span>
+              <input
+                type="number"
+                min="1"
+                value={serv.horas}
+                onChange={(e) => handleHorasChange(serv.id, parseInt(e.target.value))}
+                className="w-16 p-1 border border-gray-300 rounded-md"
+              />
+              <span>horas</span>
+            </div>
+          ))}
         </div>
+
+        {/* Accesorios */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Accesorios:</label>
           <select
             multiple
-            value={accesorios}
-            onChange={(e) => setAccesorios([...e.target.selectedOptions].map(option => option.value))}
+            onChange={(e) => setSelectedAccesorios([...e.target.selectedOptions].map(option => accesorios.find(a => a.id === parseInt(option.value))))}
             className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
           >
-            {accesorios.map((accesorio) => (
-              <option key={accesorio.id} value={accesorio.nombre}>
+            {accesorios.map(accesorio => (
+              <option key={accesorio.id} value={accesorio.id}>
                 {accesorio.nombre} - ${accesorio.precio}
               </option>
             ))}
           </select>
         </div>
+
         <div className="flex justify-center">
           <button
             type="submit"

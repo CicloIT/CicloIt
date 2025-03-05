@@ -599,107 +599,42 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { productos, servicios, accesorios } = req.body;  // Datos de productos, servicios y accesorios
-  if (!productos && !servicios && !accesorios) {
+  const { nombreCliente, descripcion, total, productos, servicios, accesorios } = req.body;
+
+  if (!productos.length && !servicios.length && !accesorios.length) {
     return res.status(400).json({ error: "Debe incluir al menos un producto, servicio o accesorio" });
   }
 
   try {
-    // Paso 1: Insertar el presupuesto (resumen general)
-    let total = 0;
-    let productosText = "";
-    let serviciosText = "";
-    let accesoriosText = "";
-
-    // Insertar productos
-    if (productos) {
-      for (const producto of productos) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio FROM producto WHERE id = ?",
-          args: [producto.id]
-        });
-        if (result.rows.length > 0) {
-          const precioProducto = result.rows[0].precio;
-          total += precioProducto * producto.cantidad;
-          productosText += `${producto.nombre}, `;
-        }
-      }
-    }
-
-    // Insertar servicios
-    if (servicios) {
-      for (const servicio of servicios) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio_por_hora FROM servicio WHERE id = ?",
-          args: [servicio.id]
-        });
-        if (result.rows.length > 0) {
-          const precioServicio = result.rows[0].precio_por_hora;
-          total += precioServicio * servicio.horas;
-          serviciosText += `${servicio.nombre}, `;
-        }
-      }
-    }
-
-    // Insertar accesorios
-    if (accesorios) {
-      for (const accesorio of accesorios) {
-        const result = await db.presupuesto.execute({
-          sql: "SELECT precio FROM accesorio WHERE id = ?",
-          args: [accesorio.id]
-        });
-        if (result.rows.length > 0) {
-          const precioAccesorio = result.rows[0].precio;
-          total += precioAccesorio * accesorio.cantidad;
-          accesoriosText += `${accesorio.nombre}, `;
-        }
-      }
-    }
-
-    // Crear el presupuesto en la tabla `presupuesto`
+    // Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (total, productos, servicios, accesorios) VALUES (?, ?, ?, ?)",
-      args: [total, productosText, serviciosText, accesoriosText]
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, total) VALUES (?, ?, ?)",
+      args: [nombreCliente, descripcion, total]
     });
 
-    // Obtener el ID del presupuesto insertado
     const presupuestoId = resultPresupuesto.lastInsertRowid;
 
-    // Paso 2: Insertar detalles en `presupuesto_detalle`
-    if (productos) {
-      for (const producto of productos) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'producto', ?, ?, ?, ?)",
-          args: [presupuestoId, producto.id, producto.nombre, producto.cantidad, producto.precio * producto.cantidad]
+    // Insertar detalles en `presupuesto_detalle`
+    const insertarDetalles = async (items, tipo) => {
+      for (const item of items) {
+        await db.presupuesto.execute({
+          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
+          args: [presupuestoId, tipo, item.id, item.nombre, item.cantidad || item.horas, item.subtotal]
         });
       }
-    }
+    };
 
-    if (servicios) {
-      for (const servicio of servicios) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'servicio', ?, ?, ?, ?)",
-          args: [presupuestoId, servicio.id, servicio.nombre, servicio.horas, servicio.precio_por_hora * servicio.horas]
-        });
-      }
-    }
+    await insertarDetalles(productos, "producto");
+    await insertarDetalles(servicios, "servicio");
+    await insertarDetalles(accesorios, "accesorio");
 
-    if (accesorios) {
-      for (const accesorio of accesorios) {
-        const result = await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, 'accesorio', ?, ?, ?, ?)",
-          args: [presupuestoId, accesorio.id, accesorio.nombre, accesorio.cantidad, accesorio.precio * accesorio.cantidad]
-        });
-      }
-    }
-
-    // Devolver la respuesta con el ID del presupuesto creado
     res.status(201).json({ presupuestoId, total, message: "Presupuesto creado exitosamente" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al crear el presupuesto" });
   }
 });
+
 
 app.get("/presupuestos", async (req, res) => {
   try {
