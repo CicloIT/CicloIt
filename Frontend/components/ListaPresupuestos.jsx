@@ -13,8 +13,17 @@ function ListaPresupuestos() {
       try {
         setLoading(true);
         const datos = await obtenerPresupuestos();
-        setPresupuestos(datos);
-        setError(null);
+        
+        // Log para verificar los datos obtenidos
+        console.log("Datos obtenidos de la API:", datos);
+
+        // Manejar el caso en que los datos estén vacíos
+        if (Array.isArray(datos)) {
+          setPresupuestos(datos);
+          setError(null);
+        } else {
+          setError('Formato de respuesta incorrecto');
+        }
       } catch (err) {
         console.error('Error al cargar presupuestos:', err);
         setError('No se pudieron cargar los presupuestos');

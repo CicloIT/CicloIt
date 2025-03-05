@@ -280,7 +280,6 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
-
   export const obtenerPresupuestos = async () => {
     try {
       const response = await fetch(`${API_URL}/presupuestos`, {
@@ -294,9 +293,17 @@ export const registrarReclamo = async (data) => {
         throw new Error('Error al obtener los presupuestos');
       }
   
-      return await response.json();
+      const data = await response.json();
+      
+      // Verificación de la respuesta para asegurarse de que sea un arreglo
+      if (Array.isArray(data)) {
+        return data;
+      } else {
+        throw new Error('Datos recibidos no son un arreglo');
+      }
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
+  
