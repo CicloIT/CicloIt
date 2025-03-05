@@ -705,16 +705,17 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
       sql: "SELECT * FROM presupuesto ORDER BY id DESC"
     });
 
+    console.log(result);
+    console.log("row",result.rows);
     // Verificar si hay resultados
     const presupuestos = result.rows || []; // Si no hay presupuestos, retorna un arreglo vacío
-
+    console.log("pre",presupuestos);
     res.status(200).json(presupuestos);
   } catch (error) {
     console.error("Error al obtener presupuestos:", error);
     res.status(500).json({ error: "Error al obtener los presupuestos", details: error.message });
   }
 });
-
 
 
 app.get("/presupuestos/:id", async (req, res) => {

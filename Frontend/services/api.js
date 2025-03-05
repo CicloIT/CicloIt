@@ -298,6 +298,7 @@ export const registrarReclamo = async (data) => {
       });
   
       console.log(response);
+      
       if (!response.ok) {
         // Obtener el cuerpo de la respuesta en caso de error para mayor detalle
         const errorData = await response.json();
