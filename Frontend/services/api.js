@@ -297,8 +297,11 @@ export const registrarReclamo = async (data) => {
         }
       });
   
+      console.log(response);
       if (!response.ok) {
-        throw new Error('Error al obtener los presupuestos api.js');
+        // Obtener el cuerpo de la respuesta en caso de error para mayor detalle
+        const errorData = await response.json();
+        throw new Error(`Error al obtener los presupuestos: ${errorData.error || 'Desconocido'}`);
       }
   
       const data = await response.json();
