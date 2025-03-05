@@ -719,7 +719,7 @@ app.get("/presupuestos/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await presupuesto.execute({
-      sql: `SELECT * FROM presupuesto_detalle WHERE presupuesto_id = ?`,
+      sql: `SELECT * FROM presupuesto WHERE id = ?`,
       args: [id]
     });
     res.status(200).json(result.rows);

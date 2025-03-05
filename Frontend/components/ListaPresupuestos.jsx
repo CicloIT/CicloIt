@@ -19,8 +19,7 @@ function ListaPresupuestos() {
           setPresupuestos(datos);
           setError(null);
         } else {
-          setPresupuestos([]);  // No hay presupuestos, dejamos el arreglo vacío
-          setError('No hay presupuestos disponibles');
+          setPresupuestos([]);  // No hay presupuestos, dejamos el arreglo vacío          
         }
       } catch (err) {
         console.error('Error al cargar presupuestos front:', err);
@@ -35,7 +34,7 @@ function ListaPresupuestos() {
   }, []);
 
   const handleVerDetalle = (id) => {
-    navigate(`/presupuestos/${id}`);
+    navigate(`/ver-presupuesto-detalles/${id}`);
   };
 
   if (loading) {
@@ -51,7 +50,7 @@ function ListaPresupuestos() {
       <h2 className="text-2xl font-semibold text-center mb-6">Listado de Presupuestos</h2>
       
       {presupuestos.length === 0 ? (
-        <div className="text-center text-gray-500">{error || 'No hay presupuestos registrados'}</div>
+        <div className="text-center text-gray-500">{'No hay presupuestos registrados'}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">

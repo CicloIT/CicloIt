@@ -298,7 +298,7 @@ export const registrarReclamo = async (data) => {
       });
   
       console.log(response);
-      
+
       if (!response.ok) {
         // Obtener el cuerpo de la respuesta en caso de error para mayor detalle
         const errorData = await response.json();
@@ -313,6 +313,25 @@ export const registrarReclamo = async (data) => {
       } else {
         throw new Error('Datos recibidos no son un arreglo válido');
       }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+  export const obtenerPresupuestoId = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/presupuestos/${id}`, {  
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al obtener el presupuesto');
+      }
+  
+      return await response.json();
     } catch (error) {
       console.error(error);
       throw error;
