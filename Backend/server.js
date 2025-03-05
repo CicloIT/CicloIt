@@ -718,7 +718,7 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
 app.get("/presupuestos/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await presupuesto.execute({
+    const result = await db.presupuesto.execute({
       sql: `SELECT * FROM presupuesto WHERE id = ?`,
       args: [id]
     });
