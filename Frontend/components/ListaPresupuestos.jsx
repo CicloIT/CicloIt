@@ -16,7 +16,7 @@ function ListaPresupuestos() {
         
         // Log para verificar los datos obtenidos
         console.log("Datos obtenidos de la API:", datos);
-
+    
         // Manejar el caso en que los datos estén vacíos
         if (Array.isArray(datos)) {
           setPresupuestos(datos);
@@ -26,11 +26,12 @@ function ListaPresupuestos() {
         }
       } catch (err) {
         console.error('Error al cargar presupuestos:', err);
-        setError('No se pudieron cargar los presupuestos');
+        setError('No se pudieron cargar los presupuestos o sesión expirada');
       } finally {
         setLoading(false);
       }
     };
+    
 
     cargarPresupuestos();
   }, []);

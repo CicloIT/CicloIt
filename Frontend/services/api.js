@@ -281,6 +281,13 @@ export const registrarReclamo = async (data) => {
     }
   };
   export const obtenerPresupuestos = async () => {
+    const token = getToken();  // Obtener el token del almacenamiento local o de donde lo tengas
+
+  // Si no hay token, lanzamos un error
+  if (!token) {
+    throw new Error('Token no disponible');
+  }
+  
     try {
       const response = await fetch(`${API_URL}/presupuestos`, {
         method: 'GET',
