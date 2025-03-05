@@ -697,6 +697,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 });
 
 
+// Obtener todos los presupuestos
 app.get("/presupuestos", verificarToken, async (req, res) => {
   try {
     // Obtener todos los presupuestos ordenados por fecha de creación (más recientes primero)
@@ -704,8 +705,8 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
       sql: "SELECT * FROM presupuesto ORDER BY id DESC"
     });
 
-    // Convertir el resultado a un array si es necesario
-    const presupuestos = result.rows;
+    // Verificar si hay resultados
+    const presupuestos = result.rows || [];
 
     res.status(200).json(presupuestos);
   } catch (error) {
@@ -713,7 +714,6 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
     res.status(500).json({ error: "Error al obtener los presupuestos", details: error.message });
   }
 });
-
 
 app.get("/presupuestos/:id", async (req, res) => {
   const { id } = req.params;
