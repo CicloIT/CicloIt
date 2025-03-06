@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiMenuAlt4, HiX } from "react-icons/hi";
-
+import "./navbar.css";  
 import { MENU_OPTIONS } from "./constants";
 import { navReducer, initialNavState } from "./navReducer";
 import { useOutsideClick } from "./hooks/useOutsideClick";
@@ -46,7 +46,7 @@ const Navbar = ({ rol, setRol }) => {
   }, []);
   
   return (
-    <nav className="bg-slate-900 shadow-lg sticky top-0 z-50" ref={navRef}>
+    <nav className="bg-slate-900 shadow-lg sticky top-0 z-50  navbar" ref={navRef}>
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

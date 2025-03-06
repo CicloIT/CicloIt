@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { obtenerPresupuestoId } from '../services/api';
-
+import "./detalles.css"
 function DetallePresupuesto() {
   const { id } = useParams();
   const [presupuesto, setPresupuesto] = useState(null);
@@ -36,6 +36,11 @@ function DetallePresupuesto() {
     return amount ? `$${parseFloat(amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '$0.00';
   };
 
+  // Función para imprimir
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (loading) return <p className="text-center text-lg text-gray-600">Cargando detalles...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
   if (!presupuesto) return <p className="text-center text-lg text-gray-600">Presupuesto no encontrado.</p>;
@@ -59,7 +64,7 @@ function DetallePresupuesto() {
             const cantidadYPrecio = detalles.replace(')', '').split(' x $');
             const cantidad = cantidadYPrecio[0] || 1;
             const precio = cantidadYPrecio[1] || 0;
-            
+
             return (
               <div key={index} className="border-b border-gray-200 py-4">
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
@@ -103,7 +108,7 @@ function DetallePresupuesto() {
             const cantidadYPrecio = detalles.replace(')', '').split(' x $');
             const cantidad = cantidadYPrecio[0] || 1;
             const precio = cantidadYPrecio[1] || 0;
-            
+
             return (
               <div key={index} className="border-b border-gray-200 py-4">
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
@@ -118,13 +123,20 @@ function DetallePresupuesto() {
       </div>
 
       <div className="text-center">
-        <button 
-          onClick={() => navigate('/')} 
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300"
-        >
-          Volver
-        </button>
-      </div>
+  <button 
+    onClick={() => navigate('/')} 
+    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300 button-volver"
+  >
+    Volver
+  </button>
+  
+  <button
+    onClick={handlePrint}
+    className="ml-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300 button-imprimir"
+  >
+    Imprimir
+  </button>  
+</div>
     </div>
   );
 }
