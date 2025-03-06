@@ -296,9 +296,7 @@ export const registrarReclamo = async (data) => {
           'Authorization': `Bearer ${token}`,  // Incluir el token en la cabecera
         }
       });
-  
-      console.log(response);
-
+        
       if (!response.ok) {
         // Obtener el cuerpo de la respuesta en caso de error para mayor detalle
         const errorData = await response.json();

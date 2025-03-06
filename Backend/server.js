@@ -618,28 +618,27 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     // Paso 1: Construir las cadenas de texto para los productos
     if (productos && productos.length > 0) {
       for (const producto of productos) {
-        // Asegurar que el ID sea un número
         const id = producto.id ? Number(producto.id) : null;
-        productosText += `${producto.nombre} (1 x $${parseFloat(producto.precio).toFixed(2)}), `;
+        const cantidad = producto.cantidad || 1; // Usar la cantidad que envía el frontend
+        productosText += `${producto.nombre} (${cantidad} x $${parseFloat(producto.precio).toFixed(2)}), `;
       }
     }
-
+    
     // Paso 2: Construir las cadenas de texto para los servicios
     if (servicios && servicios.length > 0) {
       for (const servicio of servicios) {
-        // Asegurar que el ID sea un número
         const id = servicio.id ? Number(servicio.id) : null;
         const horas = servicio.horas || 1;
         serviciosText += `${servicio.nombre} (${horas} horas a $${parseFloat(servicio.precio_por_hora).toFixed(2)}/hora), `;
       }
     }
-
+    
     // Paso 3: Construir las cadenas de texto para los accesorios
     if (accesorios && accesorios.length > 0) {
       for (const accesorio of accesorios) {
-        // Asegurar que el ID sea un número
         const id = accesorio.id ? Number(accesorio.id) : null;
-        accesoriosText += `${accesorio.nombre} (1 x $${parseFloat(accesorio.precio).toFixed(2)}), `;
+        const cantidad = accesorio.cantidad || 1; // Usar la cantidad que envía el frontend
+        accesoriosText += `${accesorio.nombre} (${cantidad} x $${parseFloat(accesorio.precio).toFixed(2)}), `;
       }
     }
 
@@ -662,22 +661,19 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     // Paso 5: Insertar los detalles de cada ítem en la tabla `presupuesto_detalle`
     const insertarDetalles = async (items, tipo) => {
       for (const item of items) {
-        // Convertir id a número si es BigInt
         const itemId = item.id ? Number(item.id) : null;
-        
-        // Para servicios, usar horas. Para otros, asumir cantidad 1
-        const cantidad = item.horas || 1;
-        const subtotal = tipo === 'servicio' 
-          ? parseFloat(item.precio_por_hora) * cantidad 
+        const cantidad = item.cantidad || 1; // Usar la cantidad que se recibe
+        const subtotal = tipo === 'servicio'
+          ? parseFloat(item.precio_por_hora) * cantidad
           : parseFloat(item.precio) * cantidad;
-
+    
         await db.presupuesto.execute({
           sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
           args: [presupuestoId, tipo, itemId, item.nombre, cantidad, subtotal]
         });
       }
     };
-
+    
     // Insertar detalles para productos, servicios y accesorios
     if (productos.length > 0) await insertarDetalles(productos, "producto");
     if (servicios.length > 0) await insertarDetalles(servicios, "servicio");
@@ -701,12 +697,9 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 app.get("/presupuestos", verificarToken, async (req, res) => {
   try {
     // Obtener todos los presupuestos ordenados por fecha de creación (más recientes primero)
-    const result = await db.presupuesto.execute("SELECT * FROM presupuesto ORDER BY fecha DESC");
-    console.log(result);
-    console.log("row",result.rows);
+    const result = await db.presupuesto.execute("SELECT * FROM presupuesto ORDER BY fecha DESC");    
     // Verificar si hay resultados
-    const presupuestos = result.rows || []; // Si no hay presupuestos, retorna un arreglo vacío
-    console.log("pre",presupuestos);
+    const presupuestos = result.rows || []; // Si no hay presupuestos, retorna un arreglo vacío    
     res.status(200).json(presupuestos);
   } catch (error) {
     console.error("Error al obtener presupuestos:", error);
