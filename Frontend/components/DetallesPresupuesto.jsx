@@ -5,9 +5,6 @@ import { obtenerPresupuestoId } from '../services/api';
 function DetallePresupuesto() {
   const { id } = useParams();
   const [presupuesto, setPresupuesto] = useState(null);
-  const [productosArray, setProductosArray] = useState([]);
-  const [serviciosArray, setServiciosArray] = useState([]);
-  const [accesoriosArray, setAccesoriosArray] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -20,12 +17,7 @@ function DetallePresupuesto() {
         
         if (data.length > 0) {
           const presupuestoData = data[0];
-          setPresupuesto(presupuestoData);
-          
-          // Convertir los datos a arrays correctamente
-          setProductosArray(parseItems(presupuestoData.productos));
-          setServiciosArray(parseItems(presupuestoData.servicios));
-          setAccesoriosArray(parseItems(presupuestoData.accesorios));
+          setPresupuesto(presupuestoData); // Establecer el presupuesto
         }
         
         setLoading(false);
@@ -39,79 +31,100 @@ function DetallePresupuesto() {
     fetchPresupuesto();
   }, [id]);
 
-  // Función para convertir strings en arrays de objetos
-  const parseItems = (data) => {
-    if (!data) return [];
-    if (typeof data === 'string') {
-      try {
-        // Verificar si el string es JSON válido
-        const parsedData = JSON.parse(data);
-        return Array.isArray(parsedData) ? parsedData : [];
-      } catch (error) {
-        console.error('Error al parsear JSON:', error);
-        console.log('Datos que causaron el error:', data);  // Ver los datos
-        return [];  // Si no es JSON, devolver un array vacío
-      }
-    }
-    return Array.isArray(data) ? data : [];
-  };
-
   // Función para formatear precios
   const formatCurrency = (amount) => {
     return amount ? `$${parseFloat(amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '$0.00';
   };
 
-  if (loading) return <p>Cargando detalles...</p>;
-  if (error) return <p>{error}</p>;
-  if (!presupuesto) return <p>Presupuesto no encontrado.</p>;
+  if (loading) return <p className="text-center text-lg text-gray-600">Cargando detalles...</p>;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (!presupuesto) return <p className="text-center text-lg text-gray-600">Presupuesto no encontrado.</p>;
 
   return (
-    <div>
-      <h2>Detalles del Presupuesto</h2>
-      <p>Cliente: {presupuesto.nombre_cliente}</p>
-      <p>Fecha: {new Date(presupuesto.fecha).toLocaleDateString()}</p>
-      <p>Total: {formatCurrency(presupuesto.total)}</p>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-50 shadow-lg rounded-lg">
+      <h2 className="text-4xl font-semibold text-center mb-8 text-blue-600">Detalles del Presupuesto</h2>
+      
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
+        <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>
+        <p className="text-xl font-medium">Total: <span className="font-bold text-green-600">{formatCurrency(presupuesto.total)}</span></p>
+      </div>
 
-      <h3>Productos</h3>
-      {productosArray.length > 0 ? (
-        productosArray.map((producto, index) => (
-          <div key={index}>
-            <p>{producto.nombre} - Cantidad: {producto.cantidad || 1}</p>
-            <p>Precio unitario: {formatCurrency(producto.precio)}</p>
-            <p>Subtotal: {formatCurrency((producto.precio || 0) * (producto.cantidad || 1))}</p>
-          </div>
-        ))
-      ) : (
-        <p>No hay productos en este presupuesto</p>
-      )}
+      {/* Sección de Productos */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Productos</h3>
+        {presupuesto.productos ? (
+          presupuesto.productos.split(', ').map((producto, index) => {
+            const [nombre, detalles] = producto.split(' (');
+            const cantidadYPrecio = detalles.replace(')', '').split(' x $');
+            const cantidad = cantidadYPrecio[0] || 1;
+            const precio = cantidadYPrecio[1] || 0;
+            
+            return (
+              <div key={index} className="border-b border-gray-200 py-4">
+                <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
+                <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
+                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+              </div>
+            );
+          })
+        ) : (
+          <p>No hay productos en este presupuesto</p>
+        )}
+      </div>
 
-      <h3>Servicios</h3>
-      {serviciosArray.length > 0 ? (
-        serviciosArray.map((servicio, index) => (
-          <div key={index}>
-            <p>{servicio.nombre} - Horas: {servicio.horas || 1}</p>
-            <p>Precio por hora: {formatCurrency(servicio.precio_por_hora)}</p>
-            <p>Subtotal: {formatCurrency((servicio.precio_por_hora || 0) * (servicio.horas || 1))}</p>
-          </div>
-        ))
-      ) : (
-        <p>No hay servicios en este presupuesto</p>
-      )}
+      {/* Sección de Servicios */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Servicios</h3>
+        {presupuesto.servicios ? (
+          presupuesto.servicios.split(', ').map((servicio, index) => {
+            const [nombre, detalles] = servicio.split(' (');
+            const [horas, precioPorHora] = detalles.replace(')', '').split(' horas a $');
+            
+            return (
+              <div key={index} className="border-b border-gray-200 py-4">
+                <p className="text-lg font-semibold text-gray-800">{nombre} - Horas: {horas}</p>
+                <p className="text-sm text-gray-600">Precio por hora: {formatCurrency(precioPorHora)}</p>
+                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precioPorHora) * horas)}</p>
+              </div>
+            );
+          })
+        ) : (
+          <p>No hay servicios en este presupuesto</p>
+        )}
+      </div>
 
-      <h3>Accesorios</h3>
-      {accesoriosArray.length > 0 ? (
-        accesoriosArray.map((accesorio, index) => (
-          <div key={index}>
-            <p>{accesorio.nombre} - Cantidad: {accesorio.cantidad || 1}</p>
-            <p>Precio unitario: {formatCurrency(accesorio.precio)}</p>
-            <p>Subtotal: {formatCurrency((accesorio.precio || 0) * (accesorio.cantidad || 1))}</p>
-          </div>
-        ))
-      ) : (
-        <p>No hay accesorios en este presupuesto</p>
-      )}
+      {/* Sección de Accesorios */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Accesorios</h3>
+        {presupuesto.accesorios ? (
+          presupuesto.accesorios.split(', ').map((accesorio, index) => {
+            const [nombre, detalles] = accesorio.split(' (');
+            const cantidadYPrecio = detalles.replace(')', '').split(' x $');
+            const cantidad = cantidadYPrecio[0] || 1;
+            const precio = cantidadYPrecio[1] || 0;
+            
+            return (
+              <div key={index} className="border-b border-gray-200 py-4">
+                <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
+                <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
+                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+              </div>
+            );
+          })
+        ) : (
+          <p>No hay accesorios en este presupuesto</p>
+        )}
+      </div>
 
-      <button onClick={() => navigate('/')}>Volver</button>
+      <div className="text-center">
+        <button 
+          onClick={() => navigate('/')} 
+          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300"
+        >
+          Volver
+        </button>
+      </div>
     </div>
   );
 }
