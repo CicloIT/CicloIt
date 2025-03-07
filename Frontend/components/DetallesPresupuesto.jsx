@@ -55,8 +55,7 @@ function DetallePresupuesto() {
       
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
-        <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>
-        <p className="text-xl font-medium">Total: <span className="font-bold text-green-600">{formatCurrency(presupuesto.total)}</span></p>
+        <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>       
       </div>
 
       {/* Sección de Productos */}
@@ -125,7 +124,7 @@ function DetallePresupuesto() {
           <p>No hay accesorios en este presupuesto</p>
         )}
       </div>
-
+      <p className="text-xl font-medium">Total: <span className="font-bold text-green-600">{formatCurrency(presupuesto.total)}</span></p>
       <div className="text-center">
         <button 
           onClick={() => navigate('/')} 
