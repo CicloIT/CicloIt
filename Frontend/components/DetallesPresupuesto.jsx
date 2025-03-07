@@ -143,7 +143,7 @@ function DetallePresupuesto() {
       </div>
 
       {/* CUIT al final */}
-      <div className="absolute bottom-4 left-4 text-sm text-gray-500">CUIT: 20-12345678-9</div>
+      <div className="absolute bottom-4 left-4 text-sm text-gray-500">CUIT: 27-42787410-4</div>
       {/* Condiciones comerciales solo visibles en la impresión */}
       <div className="condiciones-imprimir">
         <h3 className="text-lg font-bold text-gray-600 text-center mt-8">Condiciones Comerciales</h3>
