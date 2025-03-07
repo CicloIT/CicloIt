@@ -751,9 +751,6 @@ app.get("/accesorios", async (req, res) => {
 
 app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaContra } = req.body;
-  console.log("Datos recibidos en el backend:", req.body);
-  console.log("des",id,nuevaContra)
-
   if (!id || !nuevaContra) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }

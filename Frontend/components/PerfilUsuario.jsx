@@ -1,8 +1,7 @@
 import { perfilUsuario,cambiarContra } from "../services/api";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
-
 
 function PerfilUsuario() {
   const { id } = useParams();
@@ -12,8 +11,7 @@ function PerfilUsuario() {
   const [mostrarCambioContrasena, setMostrarCambioContrasena] = useState(false);
   const [nuevaPassword, setNuevaPassword] = useState("");
   const [cargandoCambio, setCargandoCambio] = useState(false);
-  
-
+  const navigate = useNavigate();
   useEffect(() => {
     const obtenerUsuario = async () => {
       try {
@@ -38,15 +36,13 @@ function PerfilUsuario() {
     setCargandoCambio(true);
     setMessage("");
     try {
-      const response = await cambiarContra(id, nuevaPassword);
-
-      if (!response.ok) {
-        throw new Error("Error al actualizar la contraseña");
-      }
-
+      await cambiarContra(id, nuevaPassword);
       setMessage("Contraseña actualizada exitosamente");
       setNuevaPassword("");
       setMostrarCambioContrasena(false);
+      setTimeout(() => {
+        navigate("/")
+      }, 1000);
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -110,7 +106,6 @@ function PerfilUsuario() {
         </button>
       </div>
     )}
-
     {/* Mensaje de éxito o error */}
     {message && <p className="mt-4 text-center text-sm text-red-500">{message}</p>}
   </div>
