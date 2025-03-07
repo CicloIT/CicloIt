@@ -336,4 +336,25 @@ export const registrarReclamo = async (data) => {
     }
   };
   
+  export const cambiarContra = async (id, nuevaContra) => {
+    try {
+      const response = await fetch(`${API_URL}/actualizar-contrasena`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, nuevaContra }),
+      });
+  
+      if (!response.ok) {
+        // Si la respuesta no es exitosa (status != 2xx), lanzamos un error.
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al actualizar la contraseña");
+      }
+  
+      // Si la respuesta es exitosa, retornamos el mensaje de éxito o el objeto que el backend devuelve.
+      return await response.json();
+    } catch (error) {
+      console.error("Error al cambiar la contraseña:", error);
+      throw new Error(error.message || "Error desconocido");
+    }
+  };
   
