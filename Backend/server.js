@@ -751,29 +751,36 @@ app.get("/accesorios", async (req, res) => {
 
 app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaPassword } = req.body;
+  console.log("Datos recibidos en el backend:", req.body);
+  
   if (!id || !nuevaPassword) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
-  try {
-    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
 
+  try {
+    // Hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+    console.log("Contraseña hasheada:", hashedPassword);
+
+    // Ejecutar la consulta para actualizar la contraseña
     const result = await db.client.execute({
       sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
       args: [hashedPassword, id],
     });
+    console.log("Resultado de la actualización:", result);
 
+    // Verificar si se actualizó alguna fila
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
+    // Responder éxito
     res.status(200).json({ message: "Contraseña actualizada exitosamente" });
   } catch (error) {
     console.error("Error al actualizar la contraseña:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
-
-
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
