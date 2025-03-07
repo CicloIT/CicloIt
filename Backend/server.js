@@ -326,9 +326,6 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const app = express();
 const port = 3000;
 
-// Configuración de Turso
-
-
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -752,7 +749,7 @@ app.get("/accesorios", async (req, res) => {
   }
 });
 
-app.put("/actualizar-contrasena",verificarToken, async (req, res) => {
+app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaPassword } = req.body;
 
   if (!id || !nuevaPassword) {
