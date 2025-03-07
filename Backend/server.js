@@ -751,11 +751,9 @@ app.get("/accesorios", async (req, res) => {
 
 app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaPassword } = req.body;
-
   if (!id || !nuevaPassword) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
-
   try {
     const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
 

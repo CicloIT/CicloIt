@@ -335,15 +335,21 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
-  
+
   export const cambiarContra = async (id, nuevaContra) => {
     try {
+
+      if (!id || !nuevaContra) {
+        throw new Error("Todos los campos son obligatorios");
+      }
       const response = await fetch(`${API_URL}/actualizar-contrasena`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, nuevaContra }),
       });
-  
+      
+      console.log("ID:", id);
+      console.log("Nueva Contraseña:", nuevaContra);
       if (!response.ok) {
         // Si la respuesta no es exitosa (status != 2xx), lanzamos un error.
         const errorData = await response.json();
