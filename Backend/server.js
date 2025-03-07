@@ -401,33 +401,6 @@ app.post("/registro", async (req, res) => {
   }
 });
 
-app.put("/actualizar-contrasena", async (req, res) => {
-  const { id, nuevaPassword } = req.body;
-
-  if (!id || !nuevaPassword) {
-    return res.status(400).json({ error: "Todos los campos son obligatorios" });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
-
-    const result = await db.client.execute({
-      sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
-      args: [hashedPassword, id],
-    });
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
-    }
-
-    res.status(200).json({ message: "Contraseña actualizada exitosamente" });
-  } catch (error) {
-    console.error("Error al actualizar la contraseña:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-
 app.get("/usuarios", async (req, res) => {
   try {
     const result = await db.client.execute("SELECT * FROM usuarios");
@@ -778,6 +751,34 @@ app.get("/accesorios", async (req, res) => {
     res.status(500).json({ error: "Error al obtener los accesorios" });
   }
 });
+
+app.put("/actualizar-contrasena",verificarToken, async (req, res) => {
+  const { id, nuevaPassword } = req.body;
+
+  if (!id || !nuevaPassword) {
+    return res.status(400).json({ error: "Todos los campos son obligatorios" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+
+    const result = await db.client.execute({
+      sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
+      args: [hashedPassword, id],
+    });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({ message: "Contraseña actualizada exitosamente" });
+  } catch (error) {
+    console.error("Error al actualizar la contraseña:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
