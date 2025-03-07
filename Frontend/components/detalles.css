@@ -3,5 +3,60 @@
     .button-imprimir{
       display: none;
     }
+
+    @page {
+      size: A4;
+      margin: 10mm; /* Márgenes más pequeños para aprovechar el espacio */
+    }
+  
+    /* Asegurarse de que todo el contenido quepa en una página */
+    body {
+      font-size: 10px; /* Reducir el tamaño de fuente para que todo quepa */
+      line-height: 1.4; /* Aumentar el espacio entre líneas para que sea más legible */
+    }
+  
+    .max-w-4xl {
+      width: 100% !important; /* Asegurarse de que el contenedor ocupe el 100% del ancho disponible */
+    }
+  
+    .bg-white {
+      padding: 12px !important; /* Reducir el padding para evitar el desbordamiento */
+    }
+  
+    /* Ajustar márgenes y tamaño de las secciones */
+    .bg-white p, .bg-white h3, .bg-white h2, .bg-white .text-xl, .bg-white .text-lg, .bg-white .text-sm {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  
+    /* Condiciones comerciales y mensaje de validez */
+    .mensaje-imprimir, .condiciones-imprimir {
+      display: block !important;
+      font-size: 9px !important; /* Reducir el tamaño de la fuente */
+      margin-top: 10px;
+      line-height: 1.2;
+    }
+  
+    .condiciones-imprimir ul {
+      padding-left: 10px;
+      font-size: 13px !important; /* Reducir el tamaño de la fuente de las condiciones */
+    }
+  
+    .condiciones-imprimir li {
+      margin-bottom: 4px;
+    }
+  
+    /* Asegurarse de que el CUIT esté en la parte inferior */
+    .absolute.bottom-4.left-4 {
+      position: static !important;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 9px;
+    }
+  
+    /* Ajustar el título Ciclo IT en la esquina */
+    .absolute.top-4.right-4 {
+      font-size: 15px !important;
+    }
   }
   

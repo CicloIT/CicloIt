@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { obtenerPresupuestoId } from '../services/api';
-import "./detalles.css"
+import './detalles.css';
+
 function DetallePresupuesto() {
   const { id } = useParams();
   const [presupuesto, setPresupuesto] = useState(null);
@@ -14,12 +15,12 @@ function DetallePresupuesto() {
       try {
         const data = await obtenerPresupuestoId(id);
         console.log('Datos del presupuesto:', data);
-        
+
         if (data.length > 0) {
           const presupuestoData = data[0];
           setPresupuesto(presupuestoData); // Establecer el presupuesto
         }
-        
+
         setLoading(false);
       } catch (err) {
         setError('Error al cargar los detalles del presupuesto');
@@ -27,7 +28,7 @@ function DetallePresupuesto() {
         console.error(err);
       }
     };
-    
+
     fetchPresupuesto();
   }, [id]);
 
@@ -42,12 +43,15 @@ function DetallePresupuesto() {
   };
 
   if (loading) return <p className="text-center text-lg text-gray-600">Cargando detalles...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (error) return <p className="text-cesnter text-red-600">{error}</p>;
   if (!presupuesto) return <p className="text-center text-lg text-gray-600">Presupuesto no encontrado.</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 shadow-lg rounded-lg">
-      <h2 className="text-4xl font-semibold text-center mb-8 text-blue-600">Detalles del Presupuesto</h2>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-50 shadow-lg rounded-lg relative">
+      <h2 className="text-4xl font-semibold text-center mb-8 text-blue-600">Detalles del Presupuestos</h2>
+      
+      {/* Título Ciclo IT en esquina */}
+      <div className="absolute top-4 lefts-4 text-lg font-bold text-gray-600">Ciclo IT</div>
       
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
@@ -85,7 +89,7 @@ function DetallePresupuesto() {
           presupuesto.servicios.split(', ').map((servicio, index) => {
             const [nombre, detalles] = servicio.split(' (');
             const [horas, precioPorHora] = detalles.replace(')', '').split(' horas a $');
-            
+
             return (
               <div key={index} className="border-b border-gray-200 py-4">
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Horas: {horas}</p>
@@ -123,20 +127,34 @@ function DetallePresupuesto() {
       </div>
 
       <div className="text-center">
-  <button 
-    onClick={() => navigate('/')} 
-    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300 button-volver"
-  >
-    Volver
-  </button>
-  
-  <button
-    onClick={handlePrint}
-    className="ml-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300 button-imprimir"
-  >
-    Imprimir
-  </button>  
-</div>
+        <button 
+          onClick={() => navigate('/')} 
+          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300 button-volver"
+        >
+          Volver
+        </button>
+
+        <button
+          onClick={handlePrint}
+          className="ml-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300 button-imprimir"
+        >
+          Imprimir
+        </button>  
+      </div>
+
+      {/* CUIT al final */}
+      <div className="absolute bottom-4 left-4 text-sm text-gray-500">CUIT: 20-12345678-9</div>
+      {/* Condiciones comerciales solo visibles en la impresión */}
+      <div className="condiciones-imprimir">
+        <h3 className="text-lg font-bold text-gray-600 text-center mt-8">Condiciones Comerciales</h3>
+        <ul id='lista' className="lista text-sm text-gray-500">
+          <li><strong>FORMA DE PAGO:</strong> Entrega del 100% de los materiales al confirmar presupuesto y el resto al finalizar el trabajo.</li>
+          <li><strong>Cotización:</strong> Dólar Banco Nación.</li>
+          <li><strong>TIEMPO DE INSTALACIÓN:</strong> Dentro de los 25 días de confirmar el presupuesto.</li>
+          <li><strong>OBSERVACIONES:</strong> Presupuesto sujeto a cambios a partir de los 3 días de la fecha del mismo.</li>
+          <li>Los precios son de contado, por transferencia o depósito bancario; en caso de cheque, se sumará un porcentaje correspondiente a la fecha de cobro.</li>
+        </ul>
+      </div>
     </div>
   );
 }
