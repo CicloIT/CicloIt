@@ -1,4 +1,4 @@
-import { perfilUsuario,actualizarContrasena } from "../services/api";
+import { perfilUsuario,cambiarContra } from "../services/api";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -38,7 +38,7 @@ function PerfilUsuario() {
     setCargandoCambio(true);
     setMessage("");
     try {
-      const response = await actualizarContrasena(id, nuevaPassword);
+      const response = await cambiarContra(id, nuevaPassword);
 
       if (!response.ok) {
         throw new Error("Error al actualizar la contraseña");

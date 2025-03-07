@@ -401,8 +401,6 @@ app.post("/registro", async (req, res) => {
   }
 });
 
-const bcrypt = require("bcrypt");
-
 app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaPassword } = req.body;
 
