@@ -752,6 +752,11 @@ app.get("/accesorios", async (req, res) => {
 app.put("/actualizar-contrasena", async (req, res) => {
   const { id, nuevaPassword } = req.body;
   console.log("Datos recibidos en el backend:", req.body);
+  console("des",id,nuevaPassword)
+  
+  if (!id || !nuevaPassword) {
+    return res.status(400).json({ error: "Todos los campos son obligatorios" });
+  }
 
   try {
     // Hash de la nueva contraseña
