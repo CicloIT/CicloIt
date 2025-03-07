@@ -750,17 +750,17 @@ app.get("/accesorios", async (req, res) => {
 });
 
 app.put("/actualizar-contrasena", async (req, res) => {
-  const { id, nuevaPassword } = req.body;
+  const { id, nuevaContra } = req.body;
   console.log("Datos recibidos en el backend:", req.body);
-  console.log("des",id,nuevaPassword)
+  console.log("des",id,nuevaContra)
 
-  if (!id || !nuevaPassword) {
+  if (!id || !nuevaContra) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
 
   try {
     // Hash de la nueva contraseña
-    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+    const hashedPassword = await bcrypt.hash(nuevaContra, 10);
     console.log("Contraseña hasheada:", hashedPassword);
 
     // Ejecutar la consulta para actualizar la contraseña
