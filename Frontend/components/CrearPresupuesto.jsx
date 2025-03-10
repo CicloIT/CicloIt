@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function CrearPresupuesto() {
   const [nombreCliente, setNombreCliente] = useState('');
-  const [cuilCliente, setCuilCliente] = useState('');
+  const [cuil, setCuilCliente] = useState('');
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);

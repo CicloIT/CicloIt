@@ -597,7 +597,8 @@ app.post("/clientes", async (req, res) => {
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
   const { nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil} = req.body;
-
+  console.log(nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil)
+  
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
 
