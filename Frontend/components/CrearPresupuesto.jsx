@@ -36,8 +36,7 @@ function CrearPresupuesto() {
         setClientes(clientesData);
         setProductos(productosData);
         setServicios(serviciosData);
-        setAccesorios(accesoriosData);
-        setCuil(clientesData.cuil)
+        setAccesorios(accesoriosData);        
       } catch (err) {
         setError("Error al cargar los datos");
         console.error(err);
@@ -45,7 +44,7 @@ function CrearPresupuesto() {
     };
     fetchData();
   }, []);
-
+  
   const calcularTotal = useMemo(() => {
     let totalTemp = 0;
 
@@ -94,6 +93,8 @@ function CrearPresupuesto() {
   // Función para seleccionar un cliente de la lista
   const seleccionarCliente = (nombreEmpresa) => {
     setNombreCliente(nombreEmpresa);
+    setCuil(clientesFiltrados.find(cliente => cliente.empresa === nombreEmpresa).cuit)
+    console.log(cuil)
     setMostrarSugerencias(false);
   };
 
