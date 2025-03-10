@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 function CrearPresupuesto() {
   const [nombreCliente, setNombreCliente] = useState('');
-  const [cuil,setCuil] = useState('')
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
@@ -93,8 +92,6 @@ function CrearPresupuesto() {
   // Función para seleccionar un cliente de la lista
   const seleccionarCliente = (nombreEmpresa) => {
     setNombreCliente(nombreEmpresa);
-    setCuil(clientesFiltrados.find(cliente => cliente.empresa === nombreEmpresa).cuit)
-    console.log(cuil)
     setMostrarSugerencias(false);
   };
 
@@ -194,7 +191,6 @@ function CrearPresupuesto() {
       productos: productosConCantidad,
       servicios: serviciosConHoras,
       accesorios: accesoriosConCantidad,
-      cuil
     };
     console.log("data",data)
     try {

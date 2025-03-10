@@ -596,8 +596,8 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil} = req.body;
-  console.log(nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil)
+  const { nombreCliente, descripcion, productos, servicios, accesorios, total} = req.body;
+  console.log(nombreCliente, descripcion, productos, servicios, accesorios, total)
 
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
@@ -647,8 +647,8 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total,cuit) VALUES (?, ?, ?, ?, ?, ?,?)",
-      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto,cuil]
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?,?)",
+      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto]
     });
 
     // Obtener el ID del presupuesto insertado
@@ -706,20 +706,39 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
 
 app.get("/presupuestos/:id", async (req, res) => {
   const presupuestoId = req.params.id;
+
   try {
-    const result = await db.presupuesto.execute({
-      sql: `SELECT p.*, c.cuil 
-            FROM presupuesto p
-            LEFT JOIN clientes c ON p.nombre_cliente = c.empresa
-            WHERE p.id = ?`,
+    // Obtener los datos del presupuesto
+    const resultPresupuesto = await db.presupuesto.execute({
+      sql: `SELECT * FROM presupuesto WHERE id = ?`,
       args: [presupuestoId]
     });
-    res.status(200).json(result.rows);
+
+    if (!resultPresupuesto.rows.length) {
+      return res.status(404).json({ error: "Presupuesto no encontrado" });
+    }
+
+    const presupuesto = resultPresupuesto.rows[0];
+    const nombreCliente = presupuesto.nombre_cliente; // Obtener el nombre del cliente
+
+    // Obtener el CUIT del cliente desde la otra base de datos
+    const resultCliente = await db.client.execute({
+      sql: `SELECT cuit FROM clientes WHERE empresa = ?`,
+      args: [nombreCliente]
+    });
+
+    // Verificar si el cliente fue encontrado
+    const cuil = resultCliente.rows.length ? resultCliente.rows[0].cuil : null;
+
+    // Devolver la respuesta combinando los datos
+    res.status(200).json({ ...presupuesto, cuil });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al obtener los detalles del presupuesto" });
   }
 });
+
 
 app.get("/productos", async (req, res) => {  
   try {
