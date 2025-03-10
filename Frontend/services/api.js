@@ -316,6 +316,7 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
+  
   export const obtenerPresupuestoId = async (id) => {
     try {
       const response = await fetch(`${API_URL}/presupuestos/${id}`, {  
