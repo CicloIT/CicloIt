@@ -728,8 +728,7 @@ app.get("/presupuestos/:id", async (req, res) => {
     });
 
     // Verificar si el cliente fue encontrado
-    const cuil = resultCliente.rows.length ? resultCliente.rows[0].cuil : null;
-    console.log(resultCliente.rows[0])    
+    const cuil = resultCliente.rows.length ? resultCliente.rows[0].cuit : null;        
     // Devolver la respuesta combinando los datos
     res.status(200).json({ ...presupuesto, cuil });
 
