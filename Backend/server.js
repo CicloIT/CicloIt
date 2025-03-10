@@ -598,7 +598,7 @@ app.post("/clientes", async (req, res) => {
 app.post("/presupuestos", verificarToken, async (req, res) => {
   const { nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil} = req.body;
   console.log(nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil)
-  
+
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
 
@@ -705,11 +705,14 @@ app.get("/presupuestos", verificarToken, async (req, res) => {
 
 
 app.get("/presupuestos/:id", async (req, res) => {
-  const { id } = req.params;
+  const presupuestoId = req.params.id;
   try {
     const result = await db.presupuesto.execute({
-      sql: `SELECT * FROM presupuesto WHERE id = ?`,
-      args: [id]
+      sql: `SELECT p.*, c.cuil 
+            FROM presupuesto p
+            LEFT JOIN clientes c ON p.nombre_cliente = c.empresa
+            WHERE p.id = ?`,
+      args: [presupuestoId]
     });
     res.status(200).json(result.rows);
   } catch (error) {

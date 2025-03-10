@@ -15,12 +15,10 @@ function DetallePresupuesto() {
       try {
         const data = await obtenerPresupuestoId(id);
         console.log('Datos del presupuesto:', data);
-
         if (data.length > 0) {
           const presupuestoData = data[0];
           setPresupuesto(presupuestoData); // Establecer el presupuesto
         }
-
         setLoading(false);
       } catch (err) {
         setError('Error al cargar los detalles del presupuesto');

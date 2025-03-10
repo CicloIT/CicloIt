@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function CrearPresupuesto() {
   const [nombreCliente, setNombreCliente] = useState('');
-  const [cuil, setCuilCliente] = useState('');
+  const [cuil,setCuil] = useState('')
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
@@ -37,6 +37,7 @@ function CrearPresupuesto() {
         setProductos(productosData);
         setServicios(serviciosData);
         setAccesorios(accesoriosData);
+        setCuil(clientesData.cuil)
       } catch (err) {
         setError("Error al cargar los datos");
         console.error(err);
@@ -91,10 +92,9 @@ function CrearPresupuesto() {
   };
 
   // Función para seleccionar un cliente de la lista
-  const seleccionarCliente = (cliente) => {
-    setNombreCliente(cliente.empresa);
-    setCuilCliente(cliente.cuil); // Asumiendo que el objeto cliente tiene una propiedad cuil
-    setMostrarSugerencias(false);    
+  const seleccionarCliente = (nombreEmpresa) => {
+    setNombreCliente(nombreEmpresa);
+    setMostrarSugerencias(false);
   };
 
   // Función para cerrar las sugerencias cuando se hace clic fuera del campo
@@ -188,14 +188,14 @@ function CrearPresupuesto() {
 
     const data = {
       nombreCliente,
-      descripcion,      
+      descripcion,
       total,
       productos: productosConCantidad,
       servicios: serviciosConHoras,
       accesorios: accesoriosConCantidad,
-      cuil,
+      cuil
     };
-
+    console.log("data",data)
     try {
       await registrarPresupuesto(data);
       navigate('/');
@@ -240,7 +240,7 @@ function CrearPresupuesto() {
                   <div
                     key={cliente.id}
                     className="cursor-pointer p-2 hover:bg-blue-50 transition-colors"
-                    onClick={() => seleccionarCliente(cliente)}
+                    onClick={() => seleccionarCliente(cliente.empresa)}
                   >
                     {cliente.empresa}
                   </div>
