@@ -52,9 +52,11 @@ function DetallePresupuesto() {
       
       {/* Título Ciclo IT en esquina */}
       <div className="absolute top-4 lefts-4 text-lg font-bold text-gray-600">Ciclo IT</div>
-      
+      <div className="">CUIT: 27-42787410-4</div>
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
+        <p className="text-xl font-medium">Cuit: <span className="font-bold">{presupuesto.cuit}</span></p>
+        <p className='text-xl font-medium'>Presupuesto Num: <span className='font-bold'>{presupuesto.id}</span></p>
         <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>       
       </div>
 
@@ -140,9 +142,7 @@ function DetallePresupuesto() {
           Imprimir
         </button>  
       </div>
-
-      {/* CUIT al final */}
-      <div className="absolute bottom-4 left-4 text-sm text-gray-500">CUIT: 27-42787410-4</div>
+           
       {/* Condiciones comerciales solo visibles en la impresión */}
       <div className="condiciones-imprimir">
         <h3 className="text-lg font-bold text-gray-600 text-center mt-8">Condiciones Comerciales</h3>

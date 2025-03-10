@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function CrearPresupuesto() {
   const [nombreCliente, setNombreCliente] = useState('');
+  const [cuilCliente, setCuilCliente] = useState('');
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
@@ -90,9 +91,10 @@ function CrearPresupuesto() {
   };
 
   // Función para seleccionar un cliente de la lista
-  const seleccionarCliente = (nombreEmpresa) => {
-    setNombreCliente(nombreEmpresa);
-    setMostrarSugerencias(false);
+  const seleccionarCliente = (cliente) => {
+    setNombreCliente(cliente.empresa);
+    setCuilCliente(cliente.cuil); // Asumiendo que el objeto cliente tiene una propiedad cuil
+    setMostrarSugerencias(false);    
   };
 
   // Función para cerrar las sugerencias cuando se hace clic fuera del campo
@@ -186,11 +188,12 @@ function CrearPresupuesto() {
 
     const data = {
       nombreCliente,
-      descripcion,
+      descripcion,      
       total,
       productos: productosConCantidad,
       servicios: serviciosConHoras,
-      accesorios: accesoriosConCantidad
+      accesorios: accesoriosConCantidad,
+      cuil,
     };
 
     try {
@@ -237,7 +240,7 @@ function CrearPresupuesto() {
                   <div
                     key={cliente.id}
                     className="cursor-pointer p-2 hover:bg-blue-50 transition-colors"
-                    onClick={() => seleccionarCliente(cliente.empresa)}
+                    onClick={() => seleccionarCliente(cliente)}
                   >
                     {cliente.empresa}
                   </div>

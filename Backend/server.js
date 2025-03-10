@@ -596,7 +596,7 @@ app.post("/clientes", async (req, res) => {
 
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios, total } = req.body;
+  const { nombreCliente, descripcion, productos, servicios, accesorios, total ,cuil} = req.body;
 
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
@@ -644,12 +644,10 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     serviciosText = serviciosText ? serviciosText.slice(0, -2) : "";
     accesoriosText = accesoriosText ? accesoriosText.slice(0, -2) : "";
 
-    console.log("Datos recibidos en el backend:", req.body);
-
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?)",
-      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto]
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total,cuil) VALUES (?, ?, ?, ?, ?, ?,?)",
+      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto,cuil]
     });
 
     // Obtener el ID del presupuesto insertado
