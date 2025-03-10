@@ -647,7 +647,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?,?)",
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total) VALUES (?, ?, ?, ?, ?, ?)",
       args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto]
     });
 
@@ -664,7 +664,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
           : parseFloat(item.precio) * cantidad;
     
         await db.presupuesto.execute({
-          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?)",
+          sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
           args: [presupuestoId, tipo, itemId, item.nombre, cantidad, subtotal]
         });
       }
