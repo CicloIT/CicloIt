@@ -14,12 +14,9 @@ function DetallePresupuesto() {
     const fetchPresupuesto = async () => {
       try {
         const data = await obtenerPresupuestoId(id);
-        console.log('Datos del presupuesto:', data);
-        if (data.length > 0) {
-          const presupuestoData = data;
-          setPresupuesto(presupuestoData); // Establecer el presupuesto          
-        }
-        console.log('Presupuesto cargado:', presupuesto);
+        console.log('Datos del presupuesto:', data);       
+        setPresupuesto(data)
+        console.log('Presupuesto cargado:', data);
         setLoading(false);
       } catch (err) {
         setError('Error al cargar los detalles del presupuesto');
@@ -53,7 +50,7 @@ function DetallePresupuesto() {
       <div className="">CUIT: 27-42787410-4</div>
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
-        <p className="text-xl font-medium">Cuit: <span className="font-bold">{presupuesto.cuit}</span></p>
+        <p className="text-xl font-medium">Cuit: <span className="font-bold">{presupuesto.cuil}</span></p>
         <p className='text-xl font-medium'>Presupuesto Num: <span className='font-bold'>{presupuesto.id}</span></p>
         <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>       
       </div>
