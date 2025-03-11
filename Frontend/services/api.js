@@ -361,23 +361,54 @@ export const registrarReclamo = async (data) => {
     }
   };
   
-export const agregarProducto = async (data) => {
-  try {
-    const response = await fetch(`${API_URL}/agregar_productos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getToken()}`
-      },
-      body: JSON.stringify(data)
-    });
-    console.log(response);
-    if (!response.ok) {
-      throw new Error('Error al agregar el producto');
+  export const agregarProducto = async (data) => {
+    try {
+      // Asegurar que los valores numéricos sean números JavaScript normales
+      const serializableData = {};
+      
+      // Procesar cada campo para garantizar el tipo correcto
+      for (const [key, value] of Object.entries(data)) {
+        if (key === 'precio_neto' || key === 'precio_con_iva') {
+          // Asegurar que sean valores de tipo REAL
+          serializableData[key] = parseFloat(Number(value).toFixed(2));
+        } else if (key === 'stock') {
+          // Asegurar que sea un valor de tipo INTEGER
+          serializableData[key] = parseInt(value, 10);
+        } else {
+          // Para otros campos (texto), mantener como están
+          serializableData[key] = value;
+        }
+      }
+  
+      console.log('Datos a enviar:', serializableData);
+      
+      // Convertir a JSON con un manejo especial para números grandes
+      const jsonData = JSON.stringify(serializableData, (key, value) => {
+        // Si es un número muy grande, convertirlo a string para evitar problemas de serialización
+        if (typeof value === 'number' && !Number.isSafeInteger(value)) {
+          return value.toString();
+        }
+        return value;
+      });
+  
+      const response = await fetch(`${API_URL}/agregar_productos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}`
+        },
+        body: jsonData
+      });
+     
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Respuesta de error:', errorText);
+        throw new Error(errorText || 'Error al agregar el producto');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error detallado:', error);
+      throw error;
     }
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
+  };

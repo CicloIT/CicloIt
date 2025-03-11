@@ -810,7 +810,7 @@ app.post("/agregar_productos", async (req, res) => {
       args: [nombre, precio_neto, precio_con_iva, proveedor, modelo, stock]
     }
   );
-  console.log(result);
+  console.log(result.rows);
   res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
  } catch (error) {
   console.error("Error al agregar producto:", error);

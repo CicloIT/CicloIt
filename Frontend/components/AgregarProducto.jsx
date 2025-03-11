@@ -97,20 +97,31 @@ const AgregarProducto = () => {
         setLoading(true);
       
         try {
-          // Asegurarnos de que los valores numéricos se envían como números de JavaScript (no BigInt)
-          const precio_neto = parseFloat(calcularPrecioConGanancia().toFixed(2));
-          const precio_con_iva = parseFloat(calcularPrecioTotal().toFixed(2));
+          // Asegurarnos de que los valores numéricos sean de tipo Number (pero no BigInt)
+          const precio_neto = Number(calcularPrecioConGanancia().toFixed(2));
+          const precio_con_iva = Number(calcularPrecioTotal().toFixed(2));
+          const stock = Number(formData.stock);
       
+          // Crear un objeto con los valores exactos que espera la base de datos
           const producto = {
             nombre: formData.nombre,
             precio_neto, 
             precio_con_iva,
             proveedor: formData.proveedor,
             modelo: formData.modelo,
-            stock: parseInt(formData.stock, 10), 
+            stock,
           };
       
+          // Verificar que los tipos de datos son correctos antes de enviar
           console.log("Enviando producto:", producto);
+          console.log("Tipos de datos:", {
+            nombre: typeof producto.nombre,
+            precio_neto: typeof producto.precio_neto,
+            precio_con_iva: typeof producto.precio_con_iva,
+            proveedor: typeof producto.proveedor,
+            modelo: typeof producto.modelo,
+            stock: typeof producto.stock
+          });
       
           const resultado = await agregarProducto(producto);
       
@@ -299,12 +310,12 @@ const AgregarProducto = () => {
               </div>
               <div>
                 <span className="font-medium">Precio con Ganancia:</span>
-                <span className="block text-xl font-bold">${calcularPrecioConGanancia() || '0.00'}</span>
+                <span className="block text-xl font-bold">${calcularPrecioConGanancia().toFixed(2) || '0.00'}</span>
                 <span className="text-sm text-gray-500">Precio de lista + {formData.ganancia}% de ganancia</span>
               </div>
               <div>
                 <span className="font-medium">Precio Final:</span>
-                <span className="block text-xl font-bold">${calcularPrecioTotal() || '0.00'}</span>
+                <span className="block text-xl font-bold">${calcularPrecioTotal().toFixed(2) || '0.00'}</span>
                 <span className="text-sm text-gray-500">Incluye ganancia, IVA y recargos</span>
               </div>
             </div>
