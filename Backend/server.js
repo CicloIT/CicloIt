@@ -721,16 +721,16 @@ app.get("/presupuestos/:id", async (req, res) => {
     const presupuesto = resultPresupuesto.rows[0];
     const nombreCliente = presupuesto.nombre_cliente; // Obtener el nombre del cliente
 
-    // Obtener el CUIT del cliente desde la otra base de datos
+    // Obtener el CUIT y tipo_iva del cliente desde la otra base de datos
     const resultCliente = await db.client.execute({
-      sql: `SELECT cuit FROM clientes WHERE empresa = ?`,
+      sql: `SELECT cuit, tipo_iva FROM clientes WHERE empresa = ?`,
       args: [nombreCliente]
     });
 
     // Verificar si el cliente fue encontrado
-    const cuil = resultCliente.rows.length ? resultCliente.rows[0].cuit : null;        
+    const cliente = resultCliente.rows.length ? resultCliente.rows[0] : null;        
     // Devolver la respuesta combinando los datos
-    res.status(200).json({ ...presupuesto, cuil });
+    res.status(200).json({ ...presupuesto, ...cliente });
 
   } catch (error) {
     console.error(error);

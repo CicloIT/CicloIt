@@ -51,6 +51,7 @@ function DetallePresupuesto() {
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <p className="text-xl font-medium">Cliente: <span className="font-bold">{presupuesto.nombre_cliente}</span></p>
         <p className="text-xl font-medium">Cuit: <span className="font-bold">{presupuesto.cuil}</span></p>
+        <p className="text-xl font-medium">Tipo IVA: <span className="font-bold">{presupuesto.tipo_iva}</span></p>
         <p className='text-xl font-medium'>Presupuesto Num: <span className='font-bold'>{presupuesto.id}</span></p>
         <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>       
       </div>
