@@ -363,7 +363,7 @@ export const registrarReclamo = async (data) => {
   
 export const agregarProducto = async (data) => {
   try {
-    const response = await fetch(`${API_URL}/agregar_productos`, {
+    const response = await fetch(`${API_URL}/agregarproductos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
