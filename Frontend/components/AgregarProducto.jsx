@@ -28,10 +28,20 @@ const AgregarProducto = () => {
     // Manejador de cambios en los inputs
     const handleChange = (e) => {
       const { name, value, type, checked } = e.target;
-      setFormData({
-        ...formData,
-        [name]: type === 'checkbox' ? checked : value,
-      });
+      
+      // Si es un campo de precio, reemplazamos comas por puntos
+      if (name === 'precio_lista' && typeof value === 'string') {
+        const formattedValue = value.replace(',', '.');
+        setFormData({
+          ...formData,
+          [name]: formattedValue
+        });
+      } else {
+        setFormData({
+          ...formData,
+          [name]: type === 'checkbox' ? checked : value,
+        });
+      }
     };
   
     // Calcular precio neto (igual al precio de lista)
@@ -41,16 +51,15 @@ const AgregarProducto = () => {
       return parseFloat(formData.precio_lista).toFixed(2);
     };
   
-    // Calcular precio con ganancia aplicada sobre el precio de lista
     const calcularPrecioConGanancia = () => {
-      if (!formData.precio_lista) return '';
+        if (!formData.precio_lista) return 0;
       
-      const precioLista = parseFloat(formData.precio_lista);
-      const ganancia = parseFloat(formData.ganancia) / 100;
+        const precioLista = parseFloat(formData.precio_lista);
+        const ganancia = parseFloat(formData.ganancia) / 100;
       
-      return (precioLista * (1 + ganancia)).toFixed(2);
-    };
-  
+        return parseFloat((precioLista * (1 + ganancia)).toFixed(2));
+      };
+      
     // Calcular el total de recargos
     const calcularRecargos = () => {
       let recargos = 0;
@@ -62,10 +71,10 @@ const AgregarProducto = () => {
       }
       return recargos;
     };
-  
+      
     // Calcular precio final con ganancia, IVA y recargos
     const calcularPrecioTotal = () => {
-      if (!formData.precio_lista) return '';
+      if (!formData.precio_lista) return 0;
       
       const precioLista = parseFloat(formData.precio_lista);
       const ganancia = parseFloat(formData.ganancia) / 100;
@@ -78,60 +87,65 @@ const AgregarProducto = () => {
       // Luego aplicamos IVA y recargo adicional
       const precioTotal = precioConGanancia * (1 + iva) * (1 + recargo);
       
-      return precioTotal.toFixed(2);
+      return parseFloat(precioTotal.toFixed(2));
     };
+      
   
     // Manejador del envío del formulario
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      setLoading(true);
+        e.preventDefault();
+        setLoading(true);
       
-      try {
-        const precio_neto = calcularPrecioConGanancia();
-        const precio_con_iva = calcularPrecioTotal();
-        
-        const producto = {
-          nombre: formData.nombre,
-          precio_neto: parseFloat(precio_neto),
-          precio_con_iva: parseFloat(precio_con_iva),
-          proveedor: formData.proveedor,
-          modelo: formData.modelo,
-          stock: parseInt(formData.stock),
-        };
-        
-        const resultado = await agregarProducto(producto);
-        
-        setMensaje({
-          tipo: 'success',
-          texto: resultado.message || 'Producto agregado exitosamente'
-        });
-        
-        // Reiniciar el formulario
-        setFormData({
-          nombre: '',
-          precio_lista: '',
-          proveedor: '',
-          modelo: '',
-          stock: '',
-          iva: '21',
-          recargo_5: false,
-          recargo_6_5: false,
-          ganancia: '30',
-        });
-        
-      } catch (error) {
-        setMensaje({
-          tipo: 'error',
-          texto: 'Error al agregar el producto'
-        });
-      } finally {
-        setLoading(false);
-        
-        // Limpiar el mensaje después de 3 segundos
-        setTimeout(() => {
-          setMensaje({ tipo: '', texto: '' });
-        }, 3000);
-      }
+        try {
+          // Asegurarnos de que los valores numéricos se envían como números de JavaScript (no BigInt)
+          const precio_neto = parseFloat(calcularPrecioConGanancia().toFixed(2));
+          const precio_con_iva = parseFloat(calcularPrecioTotal().toFixed(2));
+      
+          const producto = {
+            nombre: formData.nombre,
+            precio_neto, 
+            precio_con_iva,
+            proveedor: formData.proveedor,
+            modelo: formData.modelo,
+            stock: parseInt(formData.stock, 10), 
+          };
+      
+          console.log("Enviando producto:", producto);
+      
+          const resultado = await agregarProducto(producto);
+      
+          setMensaje({
+            tipo: 'success',
+            texto: resultado.message || 'Producto agregado exitosamente'
+          });
+      
+          // Reiniciar el formulario
+          setFormData({
+            nombre: '',
+            precio_lista: '',
+            proveedor: '',
+            modelo: '',
+            stock: '',
+            iva: '21',
+            recargo_5: false,
+            recargo_6_5: false,
+            ganancia: '30',
+          });
+      
+        } catch (error) {
+          console.error("Error al agregar producto:", error);
+          setMensaje({
+            tipo: 'error',
+            texto: 'Error al agregar el producto: ' + (error.message || 'Error desconocido')
+          });
+        } finally {
+          setLoading(false);
+      
+          // Limpiar el mensaje después de 3 segundos
+          setTimeout(() => {
+            setMensaje({ tipo: '', texto: '' });
+          }, 3000);
+        }
     };
   
     return (
@@ -197,16 +211,15 @@ const AgregarProducto = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Precio de Lista</label>
               <input
-                type="number"
+                type="text"
                 name="precio_lista"
                 value={formData.precio_lista}
                 onChange={handleChange}
                 required
-                min="0"
-                step="0.01"
+                placeholder="0.00"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              <p className="text-sm text-gray-500 mt-1">Precio base del producto</p>
+              <p className="text-sm text-gray-500 mt-1">Precio base del producto (use punto para decimales)</p>
             </div>
             
             <div>

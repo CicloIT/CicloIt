@@ -802,6 +802,7 @@ app.put("/actualizar-contrasena", async (req, res) => {
 //Productos, servicios y accesorios
 app.post("/agregar_productos", async (req, res) => {
   const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
+  console.log(req.body);
   try {
    const result = await db.presupuesto.execute(
     {
@@ -809,6 +810,7 @@ app.post("/agregar_productos", async (req, res) => {
       args: [nombre, precio_neto, precio_con_iva, proveedor, modelo, stock]
     }
   );
+  console.log(result);
   res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
  } catch (error) {
   console.error("Error al agregar producto:", error);
