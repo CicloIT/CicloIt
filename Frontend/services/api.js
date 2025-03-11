@@ -363,7 +363,7 @@ export const registrarReclamo = async (data) => {
   
 export const agregarProducto = async (data) => {
   try {
-    const response = await fetch(`${API_URL}/agregarproductos`, {
+    const response = await fetch(`${API_URL}/agregar_productos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -371,6 +371,7 @@ export const agregarProducto = async (data) => {
       },
       body: JSON.stringify(data)
     });
+    console.log(response);
     if (!response.ok) {
       throw new Error('Error al agregar el producto');
     }

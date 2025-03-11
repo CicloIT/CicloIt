@@ -799,8 +799,9 @@ app.put("/actualizar-contrasena", async (req, res) => {
 });
 
 
+
 //Productos, servicios y accesorios
-app.post("agregarproductos", async (req, res) => {
+app.post("/agregar_productos", async (req, res) => {
   const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
   try {
    const result = await db.presupuesto.execute(
