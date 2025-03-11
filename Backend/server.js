@@ -802,15 +802,11 @@ app.put("/actualizar-contrasena", async (req, res) => {
 //Productos, servicios y accesorios
 app.post("/agregar_productos", async (req, res) => {
   const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
-  
-  // Validar los tipos de los valores
   if (isNaN(precio_neto) || isNaN(precio_con_iva) || isNaN(stock)) {
-    return res.status(400).json({ error: "Precio o stock no es un número válido" });
+    return res.status(400).json({ error: "Los precios y el stock deben ser números válidos" });
   }
-
-  console.log(req.body);
-
-  try {
+  
+  try { 
     const result = await db.presupuesto.execute(
       {
         sql: "INSERT INTO productos (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)",
