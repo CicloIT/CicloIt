@@ -4,7 +4,8 @@ export const MENU_OPTIONS = {
       { to: "/registrar-cliente", label: "Registrar cliente" },
       { to: "/registrar-orden", label: "Registrar orden" },
       { to: "/registrar-reclamo", label: "Registrar reclamos" },
-      {to: "/crear-presupuesto", label: "Crear presupuesto"}
+      {to: "/crear-presupuesto", label: "Crear presupuesto"},
+      {to: "/agregar-producto", label: "Agregar producto"}
     ],
     view: [
       { to: "/usuarios", label: "Usuarios" },

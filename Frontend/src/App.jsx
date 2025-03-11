@@ -16,6 +16,7 @@ import FormularioOrden from "../components/formularioOrden";
 import Navbar from "../components/NavBar/NavBar";
 import ListaPresupuestos from "../components/ListaPresupuestos";
 import DetallePresupuesto from "../components/DetallesPresupuesto";
+import AgregarProducto from "../components/AgregarProducto";
 
 const Inicio = () => {
   return (
@@ -84,6 +85,7 @@ function App() {
         <Route path="/crear-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}> <CrearPresupuesto/></RutaProtegida>}/>
         <Route path="/ver-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}><ListaPresupuestos /> </RutaProtegida>} />
         <Route path="/ver-presupuesto-detalles/:id" element={<RutaProtegida rolesPermitidos={["admin"]}><DetallePresupuesto /></RutaProtegida>} />
+        <Route path="/agregar-producto" element={<RutaProtegida rolesPermitidos={["admin"]}><AgregarProducto /></RutaProtegida>} />
       </Routes>
     </Router>
   );

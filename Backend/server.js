@@ -784,9 +784,7 @@ app.put("/actualizar-contrasena", async (req, res) => {
     const result = await db.client.execute({
       sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
       args: [hashedPassword, id],
-    });
-    console.log("Resultado de la actualización:", result);
-
+    });    
     // Verificar si se actualizó alguna fila
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Usuario no encontrado" });
@@ -799,6 +797,25 @@ app.put("/actualizar-contrasena", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+
+
+//Productos, servicios y accesorios
+
+app.put("agregar_productos", async (req, res) => {
+  const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
+  try {
+   const result = await db.presupuesto.execute(
+    {
+      sql: "INSERT INTO producto (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)",
+      args: [nombre, precio_neto, precio_con_iva, proveedor, modelo, stock]
+    }
+  );
+  res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
+ } catch (error) {
+  console.error("Error al agregar producto:", error);
+  res.status(500).json({ error: "Error al agregar el producto" });
+ }
+} )
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
