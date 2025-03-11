@@ -361,7 +361,7 @@ export const registrarReclamo = async (data) => {
     }
   };
   
-  export const agregarProducto = async (data) => {
+  export const agregarProducto = async (producto) => {
     try {
       const response = await fetch(`${API_URL}/agregar_productos`, {
         method: 'POST',
@@ -369,7 +369,7 @@ export const registrarReclamo = async (data) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getToken()}`
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(producto)
       });
      
       if (!response.ok) {

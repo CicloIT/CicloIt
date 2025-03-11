@@ -805,7 +805,7 @@ app.post("/agregar_productos", async (req, res) => {
   if (isNaN(precio_neto) || isNaN(precio_con_iva) || isNaN(stock)) {
     return res.status(400).json({ error: "Los precios y el stock deben ser números válidos" });
   }
-  
+
   try { 
     const result = await db.presupuesto.execute(
       {
@@ -814,7 +814,7 @@ app.post("/agregar_productos", async (req, res) => {
       }
     );
     
-    console.log(result.rows);
+    console.log(result.rows[0]);
     res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
   } catch (error) {
     console.error("Error al agregar producto:", error);
