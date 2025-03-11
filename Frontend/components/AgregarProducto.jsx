@@ -56,7 +56,6 @@ const AgregarProducto = () => {
       
         const precioLista = parseFloat(formData.precio_lista);
         const ganancia = parseFloat(formData.ganancia) / 100;
-      
         return parseFloat((precioLista * (1 + ganancia)).toFixed(2));
       };
       
@@ -98,8 +97,8 @@ const AgregarProducto = () => {
       
         try {
           // Asegurarnos de que los valores numéricos sean de tipo Number (pero no BigInt)
-          const precio_neto = Number(calcularPrecioConGanancia().toFixed(2));
-          const precio_con_iva = Number(calcularPrecioTotal().toFixed(2));
+          const precio_neto = parseFloat(calcularPrecioConGanancia().toFixed(2));
+          const precio_con_iva = parseFloat(calcularPrecioTotal().toFixed(2));
           const stock = Number(formData.stock);
       
           // Crear un objeto con los valores exactos que espera la base de datos
@@ -113,15 +112,7 @@ const AgregarProducto = () => {
           };
       
           // Verificar que los tipos de datos son correctos antes de enviar
-          console.log("Enviando producto:", producto);
-          console.log("Tipos de datos:", {
-            nombre: typeof producto.nombre,
-            precio_neto: typeof producto.precio_neto,
-            precio_con_iva: typeof producto.precio_con_iva,
-            proveedor: typeof producto.proveedor,
-            modelo: typeof producto.modelo,
-            stock: typeof producto.stock
-          });
+          console.log("Enviando producto:", producto);         
       
           const resultado = await agregarProducto(producto);
       

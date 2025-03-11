@@ -379,9 +379,8 @@ export const registrarReclamo = async (data) => {
           serializableData[key] = value;
         }
       }
-  
       console.log('Datos a enviar:', serializableData);
-      
+      console.log("Tipos de datos:", Object.entries(serializableData).map(([k, v]) => `${k}: ${typeof v}`));
       // Convertir a JSON con un manejo especial para números grandes
       const jsonData = JSON.stringify(serializableData, (key, value) => {
         // Si es un número muy grande, convertirlo a string para evitar problemas de serialización

@@ -802,21 +802,29 @@ app.put("/actualizar-contrasena", async (req, res) => {
 //Productos, servicios y accesorios
 app.post("/agregar_productos", async (req, res) => {
   const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
+  
+  // Validar los tipos de los valores
+  if (isNaN(precio_neto) || isNaN(precio_con_iva) || isNaN(stock)) {
+    return res.status(400).json({ error: "Precio o stock no es un número válido" });
+  }
+
   console.log(req.body);
+
   try {
-   const result = await db.presupuesto.execute(
-    {
-      sql: "INSERT INTO productos (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)",
-      args: [nombre, precio_neto, precio_con_iva, proveedor, modelo, stock]
-    }
-  );
-  console.log(result.rows);
-  res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
- } catch (error) {
-  console.error("Error al agregar producto:", error);
-  res.status(500).json({ error: "Error al agregar el producto" });
- }
-} )
+    const result = await db.presupuesto.execute(
+      {
+        sql: "INSERT INTO productos (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)",
+        args: [nombre, parseFloat(precio_neto), parseFloat(precio_con_iva), proveedor, modelo, parseInt(stock)]
+      }
+    );
+    
+    console.log(result.rows);
+    res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
+  } catch (error) {
+    console.error("Error al agregar producto:", error);
+    res.status(500).json({ error: "Error al agregar el producto" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
