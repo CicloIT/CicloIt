@@ -386,3 +386,23 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
+
+  export const agregarServicios = async(servicio) =>{
+    try {
+      const response = await fetch(`${API_URL}/agregar_servicios`,{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify(servicio)
+      })
+      if(!response.ok){
+        const error = await response.text();
+        console.error("respuesta de error",error);
+        throw new Error(error || "Error al agregar servicio")
+      }
+    } catch (error) {
+      
+    }
+  }

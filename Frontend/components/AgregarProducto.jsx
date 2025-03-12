@@ -108,11 +108,7 @@ const AgregarProducto = () => {
             proveedor: formData.proveedor,
             modelo: formData.modelo,
             stock,
-          };
-      
-          // Verificar que los tipos de datos son correctos antes de enviar
-          console.log("Enviando producto:", producto);         
-      
+          };                   
           const resultado = await agregarProducto(producto);
       
           setMensaje({

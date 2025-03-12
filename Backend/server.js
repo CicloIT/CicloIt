@@ -814,14 +814,33 @@ app.post("/agregar_productos", async (req, res) => {
       }
     );
     //pasamos el id de bigInt a numeber
-    const lastInsertId = Number(result.lastInsertRowid);
-    console.log(result.lastInsertRowid);
+    const lastInsertId = Number(result.lastInsertRowid);    
     res.status(201).json({ id: lastInsertId, message: "Producto agregado exitosamente" });
   } catch (error) {
     console.error("Error al agregar producto:", error);
     res.status(500).json({ error: "Error al agregar el producto" });
   }
 });
+
+//Productos, servicios y accesorios
+app.post("/agregar_servicios", async (req, res) => {
+  const { nombre, precio_por_hora} = req.body;  
+  try { 
+    const result = await db.presupuesto.execute(
+      {
+        sql: "INSERT INTO servicios (nombre, precio_por_hora) VALUES (?, ?)",
+        args: [nombre, precio_por_hora]
+      }
+    );
+    //pasamos el id de bigInt a numeber
+    const lastInsertId = Number(result.lastInsertRowid);    
+    res.status(201).json({ id: lastInsertId, message: "Producto agregado exitosamente" });
+  } catch (error) {
+    console.error("Error al agregar producto:", error);
+    res.status(500).json({ error: "Error al agregar el producto" });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
