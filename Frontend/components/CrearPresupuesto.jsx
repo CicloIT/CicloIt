@@ -48,7 +48,7 @@ function CrearPresupuesto() {
     let totalTemp = 0;
 
     selectedProductos.forEach(producto => {
-      totalTemp += (producto.precio || 0) * (productoCantidad[producto.id] || 1);
+      totalTemp += (producto.precio_con_iva || 0) * (productoCantidad[producto.id] || 1);
     });
 
     selectedServicios.forEach(serv => {
@@ -56,7 +56,7 @@ function CrearPresupuesto() {
     });
 
     selectedAccesorios.forEach(accesorio => {
-      totalTemp += (accesorio.precio || 0) * (accesorioCantidad[accesorio.id] || 1);
+      totalTemp += (accesorio.precio_con_iva || 0) * (accesorioCantidad[accesorio.id] || 1);
     });
 
     return totalTemp;
@@ -207,85 +207,87 @@ function CrearPresupuesto() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-2xl border border-gray-100">
-      <h2 className="text-4xl font-bold text-center text-blue-700 mb-8">Crear Nuevo Presupuesto</h2>
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Cliente:</label>
-            <input
-              type="text"
-              value={nombreCliente}
-              onChange={handleSearch}
-              onFocus={() => {
-                // Si ya hay un espacio, mostrar las sugerencias
-                if (nombreCliente === ' ') {
-                  setClientesFiltrados(clientes);
-                  setMostrarSugerencias(true);
-                } else if (nombreCliente.trim() !== '') {
-                  setMostrarSugerencias(true);
-                }
-              }}
-              onBlur={cerrarSugerencias}
-              required
-              className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
-              placeholder="Presiona espacio para ver todos los clientes o escribe para filtrar"
-            />
-            {mostrarSugerencias && clientesFiltrados.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto border border-gray-200">
-                {clientesFiltrados.map(cliente => (
-                  <div
-                    key={cliente.id}
-                    className="cursor-pointer p-2 hover:bg-blue-50 transition-colors"
-                    onClick={() => seleccionarCliente(cliente.empresa)}
-                  >
-                    {cliente.empresa}
-                  </div>
-                ))}
-              </div>
-            )}
-            {mostrarSugerencias && clientesFiltrados.length === 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg p-2 border border-gray-200">
-                <p className="text-gray-500 text-center">No se encontraron clientes</p>
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Descripción:</label>
-            <textarea
-              rows="3"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              required
-              className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
-              placeholder="Breve descripción del presupuesto"
-            ></textarea>
-          </div>
+    <h2 className="text-4xl font-bold text-center text-blue-700 mb-8">Crear Nuevo Presupuesto</h2>
+    {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Cliente:</label>
+          <input
+            type="text"
+            value={nombreCliente}
+            onChange={handleSearch}
+            onFocus={() => {
+              // Si ya hay un espacio, mostrar las sugerencias
+              if (nombreCliente === ' ') {
+                setClientesFiltrados(clientes);
+                setMostrarSugerencias(true);
+              } else if (nombreCliente.trim() !== '') {
+                setMostrarSugerencias(true);
+              }
+            }}
+            onBlur={cerrarSugerencias}
+            required
+            className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+            placeholder="Presiona espacio para ver todos los clientes o escribe para filtrar"
+          />
+          {mostrarSugerencias && clientesFiltrados.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto border border-gray-200">
+              {clientesFiltrados.map(cliente => (
+                <div
+                  key={cliente.id}
+                  className="cursor-pointer p-2 hover:bg-blue-50 transition-colors"
+                  onClick={() => seleccionarCliente(cliente.empresa)}
+                >
+                  {cliente.empresa}
+                </div>
+              ))}
+            </div>
+          )}
+          {mostrarSugerencias && clientesFiltrados.length === 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg p-2 border border-gray-200">
+              <p className="text-gray-500 text-center">No se encontraron clientes</p>
+            </div>
+          )}
         </div>
-
-        {/* Productos */}
-        <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Productos</h3>
-          <select
-            onChange={handleAddProducto}
-            value=""
-            className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-          >
-            <option value="">-- Seleccionar Producto --</option>
-            {productos.map(producto => (
-              <option key={producto.id} value={producto.id}>
-                {producto.nombre} - ${producto.precio.toFixed(2)}
-              </option>
-            ))}
-          </select>
-
-          {selectedProductos.length > 0 && (
-            <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
-              <h4 className="font-medium text-gray-700 mb-4">Productos seleccionados:</h4>
-              {selectedProductos.map(prod => (
-                <div key={prod.id} className="flex items-center justify-between mb-4">
-                  <div className="text-gray-800">{prod.nombre}</div>
-                  <div className="flex items-center space-x-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Descripción:</label>
+          <textarea
+            rows="3"
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            required
+            className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+            placeholder="Breve descripción del presupuesto"
+          ></textarea>
+        </div>
+      </div>
+  
+      {/* Productos */}
+      <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Productos</h3>
+        <select
+          onChange={handleAddProducto}
+          value=""
+          className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+        >
+          <option value="">-- Seleccionar Producto --</option>
+          {productos.map(producto => (
+            <option key={producto.id} value={producto.id}>
+              {producto.nombre} - ${Number(producto.precio_con_iva).toFixed(2)}
+            </option>
+          ))}
+        </select>
+  
+        {selectedProductos.length > 0 && (
+          <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
+            <h4 className="font-medium text-gray-700 mb-4">Productos seleccionados:</h4>
+            {selectedProductos.map(prod => (
+              <div key={prod.id} className="flex flex-wrap items-center justify-between mb-4">
+                <div className="text-gray-800 mb-2 md:mb-0">{prod.nombre}</div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-2">Cantidad:</span>
                     <input
                       type="number"
                       min="1"
@@ -293,45 +295,52 @@ function CrearPresupuesto() {
                       onChange={(e) => setProductoCantidad({ ...productoCantidad, [prod.id]: e.target.value })}
                       className="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveProducto(prod.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
                   </div>
+                  <div className="text-sm md:text-base">
+                    <span className="text-gray-600">${Number(prod.precio_con_iva).toFixed(2)} c/u | </span>
+                    <span className="font-semibold text-indigo-600">Total: ${(Number(productoCantidad[prod.id] || 1) * Number(prod.precio_con_iva)).toFixed(2)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveProducto(prod.id)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Servicios */}
-        <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Servicios</h3>
-          <select
-            onChange={handleAddServicio}
-            value=""
-            className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-          >
-            <option value="">-- Seleccionar Servicio --</option>
-            {servicios.map(serv => (
-              <option key={serv.id} value={serv.id}>
-                {serv.nombre} - ${serv.precio_por_hora.toFixed(2)} / hora
-              </option>
+              </div>
             ))}
-          </select>
-
-          {selectedServicios.length > 0 && (
-            <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
-              <h4 className="font-medium text-gray-700 mb-4">Servicios seleccionados:</h4>
-              {selectedServicios.map(serv => (
-                <div key={serv.id} className="flex items-center justify-between mb-4">
-                  <div className="text-gray-800">{serv.nombre}</div>
-                  <div className="flex items-center space-x-4">
+          </div>
+        )}
+      </section>
+  
+      {/* Servicios */}
+      <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Servicios</h3>
+        <select
+          onChange={handleAddServicio}
+          value=""
+          className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+        >
+          <option value="">-- Seleccionar Servicio --</option>
+          {servicios.map(serv => (
+            <option key={serv.id} value={serv.id}>
+              {serv.nombre} - ${Number(serv.precio_por_hora).toFixed(2)} / hora
+            </option>
+          ))}
+        </select>
+  
+        {selectedServicios.length > 0 && (
+          <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
+            <h4 className="font-medium text-gray-700 mb-4">Servicios seleccionados:</h4>
+            {selectedServicios.map(serv => (
+              <div key={serv.id} className="flex flex-wrap items-center justify-between mb-4">
+                <div className="text-gray-800 mb-2 md:mb-0">{serv.nombre}</div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-2">Horas:</span>
                     <input
                       type="number"
                       min="1"
@@ -339,45 +348,52 @@ function CrearPresupuesto() {
                       onChange={(e) => setServicioHoras({ ...servicioHoras, [serv.id]: e.target.value })}
                       className="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveServicio(serv.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
                   </div>
+                  <div className="text-sm md:text-base">
+                    <span className="text-gray-600">${Number(serv.precio_por_hora).toFixed(2)} /hora | </span>
+                    <span className="font-semibold text-indigo-600">Total: ${(Number(servicioHoras[serv.id] || 1) * Number(serv.precio_por_hora)).toFixed(2)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveServicio(serv.id)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Accesorios */}
-        <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Accesorios</h3>
-          <select
-            onChange={handleAddAccesorio}
-            value=""
-            className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-          >
-            <option value="">-- Seleccionar Accesorio --</option>
-            {accesorios.map(acc => (
-              <option key={acc.id} value={acc.id}>
-                {acc.nombre} - ${acc.precio.toFixed(2)}
-              </option>
+              </div>
             ))}
-          </select>
-
-          {selectedAccesorios.length > 0 && (
-            <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
-              <h4 className="font-medium text-gray-700 mb-4">Accesorios seleccionados:</h4>
-              {selectedAccesorios.map(acc => (
-                <div key={acc.id} className="flex items-center justify-between mb-4">
-                  <div className="text-gray-800">{acc.nombre}</div>
-                  <div className="flex items-center space-x-4">
+          </div>
+        )}
+      </section>
+  
+      {/* Accesorios */}
+      <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Accesorios</h3>
+        <select
+          onChange={handleAddAccesorio}
+          value=""
+          className="mt-1 p-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+        >
+          <option value="">-- Seleccionar Accesorio --</option>
+          {accesorios.map(acc => (
+            <option key={acc.id} value={acc.id}>
+              {acc.nombre} - ${Number(acc.precio_con_iva).toFixed(2)}
+            </option>
+          ))}
+        </select>
+  
+        {selectedAccesorios.length > 0 && (
+          <div className="mt-6 bg-white p-5 rounded-md border border-gray-200 shadow-sm">
+            <h4 className="font-medium text-gray-700 mb-4">Accesorios seleccionados:</h4>
+            {selectedAccesorios.map(acc => (
+              <div key={acc.id} className="flex flex-wrap items-center justify-between mb-4">
+                <div className="text-gray-800 mb-2 md:mb-0">{acc.nombre}</div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-2">Cantidad:</span>
                     <input
                       type="number"
                       min="1"
@@ -385,40 +401,45 @@ function CrearPresupuesto() {
                       onChange={(e) => setAccesorioCantidad({ ...accesorioCantidad, [acc.id]: e.target.value })}
                       className="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAccesorio(acc.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
                   </div>
+                  <div className="text-sm md:text-base">
+                    <span className="text-gray-600">${Number(acc.precio_con_iva).toFixed(2)} c/u | </span>
+                    <span className="font-semibold text-indigo-600">Total: ${(Number(accesorioCantidad[acc.id] || 1) * Number(acc.precio_con_iva)).toFixed(2)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAccesorio(acc.id)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Total */}
-        <div className="flex justify-between items-center mt-8">
-          <span className="font-medium text-xl text-gray-800">Total:</span>
-          <span className="text-2xl font-bold text-green-700">${total.toFixed(2)}</span>
-        </div>
-
-        {/* Submit */}
-        <div className="flex justify-center mt-8">
-          <button
-            type="submit"
-            className="px-8 py-3 bg-indigo-600  text-white rounded-lg hover:bg-indigo-700  transition-all shadow-lg hover:shadow-xl"
-            disabled={loading}
-          >
-            {loading ? "Creando..." : "Crear Presupuesto"}
-          </button>
-        </div>
-      </form>
-    </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+  
+      {/* Total */}
+      <div className="flex justify-between items-center mt-8">
+        <span className="font-medium text-xl text-gray-800">Total:</span>
+        <span className="text-2xl font-bold text-green-700">${total.toFixed(2)}</span>
+      </div>
+  
+      {/* Submit */}
+      <div className="flex justify-center mt-8">
+        <button
+          type="submit"
+          className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl"
+          disabled={loading}
+        >
+          {loading ? "Creando..." : "Crear Presupuesto"}
+        </button>
+      </div>
+    </form>
+  </div>
   );
 }
 

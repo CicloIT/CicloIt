@@ -597,8 +597,6 @@ app.post("/clientes", async (req, res) => {
 /* Presupuesto */
 app.post("/presupuestos", verificarToken, async (req, res) => {
   const { nombreCliente, descripcion, productos, servicios, accesorios, total} = req.body;
-  console.log(nombreCliente, descripcion, productos, servicios, accesorios, total)
-
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
 
@@ -618,7 +616,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
       for (const producto of productos) {
         const id = producto.id ? Number(producto.id) : null;
         const cantidad = producto.cantidad || 1; // Usar la cantidad que envía el frontend
-        productosText += `${producto.nombre} (${cantidad} x $${parseFloat(producto.precio).toFixed(2)}), `;
+        productosText += `${producto.nombre} (${cantidad} x $${parseFloat(producto.precio_con_iva).toFixed(2)}), `;
       }
     }
     
@@ -636,7 +634,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
       for (const accesorio of accesorios) {
         const id = accesorio.id ? Number(accesorio.id) : null;
         const cantidad = accesorio.cantidad || 1; // Usar la cantidad que envía el frontend
-        accesoriosText += `${accesorio.nombre} (${cantidad} x $${parseFloat(accesorio.precio).toFixed(2)}), `;
+        accesoriosText += `${accesorio.nombre} (${cantidad} x $${parseFloat(accesorio.precio_con_iva).toFixed(2)}), `;
       }
     }
 
@@ -661,7 +659,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
         const cantidad = item.cantidad || 1; // Usar la cantidad que se recibe
         const subtotal = tipo === 'servicio'
           ? parseFloat(item.precio_por_hora) * cantidad
-          : parseFloat(item.precio) * cantidad;
+          : parseFloat(item.precio_con_iva) * cantidad;
     
         await db.presupuesto.execute({
           sql: "INSERT INTO presupuesto_detalle (presupuesto_id, tipo, item_id, nombre, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
@@ -671,9 +669,9 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     };
     
     // Insertar detalles para productos, servicios y accesorios
-    if (productos.length > 0) await insertarDetalles(productos, "producto");
-    if (servicios.length > 0) await insertarDetalles(servicios, "servicio");
-    if (accesorios.length > 0) await insertarDetalles(accesorios, "accesorio");
+    if (productos.length > 0) await insertarDetalles(productos, "productos");
+    if (servicios.length > 0) await insertarDetalles(servicios, "servicios");
+    if (accesorios.length > 0) await insertarDetalles(accesorios, "accesorios");
 
     // Devolver la respuesta con el ID del presupuesto creado
     res.status(201).json({ 
@@ -800,27 +798,36 @@ app.put("/actualizar-contrasena", async (req, res) => {
 
 
 //Productos, servicios y accesorios
-app.post("/agregar_productos", async (req, res) => {
-  const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock } = req.body;
+app.post("/agregar_producto_o_accesorio", async (req, res) => {
+  const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock, categoria } = req.body;
+
   if (isNaN(precio_neto) || isNaN(precio_con_iva) || isNaN(stock)) {
     return res.status(400).json({ error: "Los precios y el stock deben ser números válidos" });
   }
 
-  try { 
+  // Validar que la categoría sea válida
+  if (!["producto", "accesorio"].includes(categoria)) {
+    return res.status(400).json({ error: "Categoría no válida" });
+  }
+
+  try {
+    let table = categoria === "producto" ? "productos" : "accesorios";
+
     const result = await db.presupuesto.execute(
       {
-        sql: "INSERT INTO productos (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)",
+        sql: `INSERT INTO ${table} (nombre, precio_neto, precio_con_iva, proveedor, modelo, stock) VALUES (?, ?, ?, ?, ?, ?)`,
         args: [nombre, parseFloat(precio_neto), parseFloat(precio_con_iva), proveedor, modelo, parseInt(stock)]
       }
     );
-    //pasamos el id de bigInt a numeber
-    const lastInsertId = Number(result.lastInsertRowid);    
-    res.status(201).json({ id: lastInsertId, message: "Producto agregado exitosamente" });
+
+    const lastInsertId = Number(result.lastInsertRowid);
+    res.status(201).json({ id: lastInsertId, message: `${categoria.charAt(0).toUpperCase() + categoria.slice(1)} agregado exitosamente` });
   } catch (error) {
-    console.error("Error al agregar producto:", error);
-    res.status(500).json({ error: "Error al agregar el producto" });
+    console.error("Error al agregar producto o accesorio:", error);
+    res.status(500).json({ error: "Error al agregar el producto o accesorio" });
   }
 });
+
 
 //Productos, servicios y accesorios
 app.post("/agregar_servicios", async (req, res) => {
