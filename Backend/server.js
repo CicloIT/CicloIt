@@ -813,8 +813,10 @@ app.post("/agregar_productos", async (req, res) => {
         args: [nombre, parseFloat(precio_neto), parseFloat(precio_con_iva), proveedor, modelo, parseInt(stock)]
       }
     );
+    //pasamos el id de bigInt a numeber
+    const lastInsertId = Number(result.lastInsertRowid);
     console.log(result.lastInsertRowid);
-    res.status(201).json({ id: result.lastInsertRowid, message: "Producto agregado exitosamente" });
+    res.status(201).json({ id: lastInsertId, message: "Producto agregado exitosamente" });
   } catch (error) {
     console.error("Error al agregar producto:", error);
     res.status(500).json({ error: "Error al agregar el producto" });
