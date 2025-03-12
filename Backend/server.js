@@ -796,9 +796,8 @@ app.put("/actualizar-contrasena", async (req, res) => {
   }
 });
 
-
 //Productos, servicios y accesorios
-app.post("/agregar_producto_o_accesorio", async (req, res) => {
+app.post("/agregar_producto", async (req, res) => {
   const { nombre, precio_neto, precio_con_iva, proveedor, modelo, stock, categoria } = req.body;
 
   if (isNaN(precio_neto) || isNaN(precio_con_iva) || isNaN(stock)) {
