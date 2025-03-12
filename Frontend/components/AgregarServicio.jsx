@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { agregarServicio } from '../api/serviciosApi'; // Importamos tu función existente
+import { agregarServicios } from '../services/api'; // Importamos tu función existente
 
 const AgregarServicio = () => {
   const [formData, setFormData] = useState({
@@ -31,11 +31,8 @@ const AgregarServicio = () => {
         setCargando(false);
         return;
       }
-
       // Usar tu función existente para agregar el servicio
-      const data = await agregarServicio(formData);      
-      console.log('Servicio agregado:', data);
-
+      await agregarServicios(formData);            
       // Mostrar mensaje de éxito
       setMensaje({
         texto: 'Servicio agregado exitosamente',
@@ -105,7 +102,7 @@ const AgregarServicio = () => {
             type="submit" 
             disabled={cargando} 
             className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-              cargando ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500'
+              cargando ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-green-500'
             }`}
           >
             {cargando ? 'Agregando...' : 'Agregar Servicio'}

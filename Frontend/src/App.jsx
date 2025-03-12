@@ -17,6 +17,7 @@ import Navbar from "../components/NavBar/NavBar";
 import ListaPresupuestos from "../components/ListaPresupuestos";
 import DetallePresupuesto from "../components/DetallesPresupuesto";
 import AgregarProducto from "../components/AgregarProducto";
+import AgregarServicio from "../components/AgregarServicio";
 
 const Inicio = () => {
   return (

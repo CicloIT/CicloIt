@@ -411,7 +411,7 @@ function CrearPresupuesto() {
         <div className="flex justify-center mt-8">
           <button
             type="submit"
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
+            className="px-8 py-3 bg-indigo-600  text-white rounded-lg hover:bg-indigo-700  transition-all shadow-lg hover:shadow-xl"
             disabled={loading}
           >
             {loading ? "Creando..." : "Crear Presupuesto"}

@@ -741,7 +741,7 @@ app.get("/presupuestos/:id", async (req, res) => {
 
 app.get("/productos", async (req, res) => {  
   try {
-    const result = await db.presupuesto.execute("SELECT * FROM producto");
+    const result = await db.presupuesto.execute("SELECT * FROM productos");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
@@ -751,7 +751,7 @@ app.get("/productos", async (req, res) => {
 
 app.get("/servicios", async (req, res) => {
   try {
-    const result = await db.presupuesto.execute("SELECT * FROM servicio");
+    const result = await db.presupuesto.execute("SELECT * FROM servicios");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
@@ -761,7 +761,7 @@ app.get("/servicios", async (req, res) => {
 
 app.get("/accesorios", async (req, res) => {
   try {
-    const result = await db.presupuesto.execute("SELECT * FROM accesorio");
+    const result = await db.presupuesto.execute("SELECT * FROM accesorios");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
