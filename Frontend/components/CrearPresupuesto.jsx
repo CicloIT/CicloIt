@@ -173,15 +173,20 @@ function CrearPresupuesto() {
 
     const productosConCantidad = selectedProductos.map(prod => ({
       ...prod,
-      cantidad: productoCantidad[prod.id] || 1
+      cantidad: productoCantidad[prod.id] || 1,
+      tipo: 'producto'  // Add this line
     }));
+    
     const serviciosConHoras = selectedServicios.map(serv => ({
       ...serv,
-      horas: servicioHoras[serv.id] || 1
+      horas: servicioHoras[serv.id] || 1,
+      tipo: 'servicio'  // Add this line
     }));
+    
     const accesoriosConCantidad = selectedAccesorios.map(acc => ({
       ...acc,
-      cantidad: accesorioCantidad[acc.id] || 1
+      cantidad: accesorioCantidad[acc.id] || 1,
+      tipo: 'accesorio'  // Add this line
     }));
 
     const data = {

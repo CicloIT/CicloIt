@@ -1,5 +1,5 @@
-const API_URL = 'http://localhost:3000'; /*'https://ciclo-it.vercel.app'*/
-
+const API_URL = 'https://ciclo-it.vercel.app';
+/*const API_URL_ORDENES = 'http://localhost:3000'; */
 export const login = async (data) => {
   try {
       const response = await fetch(`${API_URL}/login`, {
@@ -24,7 +24,6 @@ export const login = async (data) => {
 };
 
 const getToken = () => localStorage.getItem('token');
-
 export const registroUsuario = async (data) => {
     try {
         const response = await fetch(`${API_URL}/registro`, {
@@ -410,13 +409,18 @@ export const registrarReclamo = async (data) => {
 
   export const generarOT = async (idPresupuesto) => {
     try {
-      const respuesta = await fetch(`${API_URL}/agregar-ot`, {
+      const respuesta = await fetch(`${API_URL}/agregar_ot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_presupuesto: idPresupuesto }),
       });
+      const data = await respuesta.json();
+      console.log(data)
+      if (!respuesta.ok) {
+        throw new Error(data.error || 'Error al generar la OT');
+      }
   
-      return await respuesta.json();
+      alert(data.message); // Muestra mensaje de éxito o error
     } catch (error) {
       console.error('Error al generar OT:', error);
       throw error;

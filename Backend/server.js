@@ -645,7 +645,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     const estado = "pendiente"; 
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
       args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto, estado]
     });
 
@@ -669,9 +669,9 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     };
     
     // Insertar detalles para productos, servicios y accesorios
-    if (productos.length > 0) await insertarDetalles(productos, "productos");
-    if (servicios.length > 0) await insertarDetalles(servicios, "servicios");
-    if (accesorios.length > 0) await insertarDetalles(accesorios, "accesorios");
+    if (productos.length > 0) await insertarDetalles(productos, "producto");
+    if (servicios.length > 0) await insertarDetalles(servicios, "servicio");
+    if (accesorios.length > 0) await insertarDetalles(accesorios, "accesorio");
 
     // Devolver la respuesta con el ID del presupuesto creado
     res.status(201).json({ 
@@ -849,42 +849,53 @@ app.post("/agregar_servicios", async (req, res) => {
 
 app.post("/agregar_ot", async (req, res) => {
   const { id_presupuesto } = req.body; // Asegúrate de enviar el ID en el body
-
   if (!id_presupuesto) {
     return res.status(400).json({ error: "ID de presupuesto requerido" });
   }
 
   try {
-    // 1️⃣ Obtener los datos del presupuesto
-    const result = await db.presupuesto.execute({
+    // 1️⃣ Obtener los datos del presupuesto desde la base de datos de presupuesto
+    const presupuestoResult = await db.presupuesto.execute({
       sql: "SELECT nombre_cliente, productos, accesorios, servicios FROM presupuesto WHERE id = ?",
       args: [id_presupuesto]
     });
 
-    if (result.rows.length === 0) {
+    if (presupuestoResult.rows.length === 0) {
       return res.status(404).json({ error: "Presupuesto no encontrado" });
     }
 
-    const { nombre_cliente, productos, accesorios, servicios } = result.rows[0];
+    const { nombre_cliente, productos, accesorios, servicios } = presupuestoResult.rows[0];    
 
-    // 2️⃣ Construir la descripción concatenada
-    const descripcion = [productos, accesorios, servicios].filter(Boolean).join(', ');
-
-    // 3️⃣ Insertar los datos en la tabla OT
-    const ot = await db.client.execute({
-      sql: `INSERT INTO OT (id_cliente, descripcion, estado, creacion, modificacion, id_presupuesto)  
-            VALUES (?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)`,
-      args: [nombre_cliente, descripcion, id_presupuesto],
+    // 2️⃣ Obtener el id_cliente a partir del nombre_cliente en la base de datos de clientes
+    const clienteResult = await db.client.execute({
+      sql: "SELECT id FROM clientes WHERE empresa = ?", // Cambio de nombre a empresa en vez de nombre_cliente
+      args: [nombre_cliente]
     });
 
-    res.json({ success: true, message: "OT generada correctamente", otId: ot.lastInsertRowid });
+    if (clienteResult.rows.length === 0) {
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+
+    const id_cliente = clienteResult.rows[0].id;
+
+    // 3️⃣ Construir la descripción concatenada
+    const descripcion = [productos, accesorios, servicios].filter(Boolean).join(', ');
+
+    // 4️⃣ Insertar los datos en la tabla OT en la base de datos de clientes
+    const ot = await db.client.execute({
+      sql: `INSERT INTO orden_trabajo (id_cliente, importancia, descripcion, estado, creacion, modificacion, id_presupuesto, id_usuario)  
+            VALUES (?, 'baja', ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1)`,
+      args: [id_cliente, descripcion, id_presupuesto], // Usamos id_cliente directamente
+    });
+
+    res.json({ success: true, message: "OT generada correctamente", otId: Number(ot.lastInsertRowid) });
+
 
   } catch (error) {
     console.error("Error al agregar orden de trabajo:", error);
     res.status(500).json({ error: "Error al agregar la orden de trabajo" });
   }
 });
-
 
 
 app.listen(port, () => {

@@ -36,6 +36,8 @@ function ListaPresupuestos() {
     navigate(`/ver-presupuesto-detalles/${id}`);
   };
 
+
+  /*
   const handleGenerarOT = async (idPresupuesto) => {
     setLoadingOT(idPresupuesto); // Indica que este presupuesto está en proceso
 
@@ -44,6 +46,17 @@ function ListaPresupuestos() {
       alert(respuesta.message); // Muestra mensaje de éxito o error
     } catch (error) {
       alert('Error al generar la OT',error);
+    } finally {
+      setLoadingOT(null); // Restablece el estado
+    }
+  };*/
+
+  const handleGenerarOT = async (idPresupuesto) => {
+    setLoadingOT(idPresupuesto); // Indica que este presupuesto está en proceso
+    try{
+      await generarOT(idPresupuesto)
+    }catch (error) {
+      alert('Error al generar la OT: ' + error.message);
     } finally {
       setLoadingOT(null); // Restablece el estado
     }
