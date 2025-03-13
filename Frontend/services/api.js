@@ -1,4 +1,4 @@
-const API_URL = 'https://ciclo-it.vercel.app';
+const API_URL = 'http://localhost:3000'; /*'https://ciclo-it.vercel.app'*/
 
 export const login = async (data) => {
   try {
