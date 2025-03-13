@@ -847,45 +847,6 @@ app.post("/agregar_servicios", async (req, res) => {
   }
 });
 
-app.post("/agregar_ot", async (req, res) => {
-  const { id_presupuesto } = req.body; // Asegúrate de enviar el ID en el body
-
-  if (!id_presupuesto) {
-    return res.status(400).json({ error: "ID de presupuesto requerido" });
-  }
-
-  try {
-    // 1️⃣ Obtener los datos del presupuesto
-    const result = await db.presupuesto.execute({
-      sql: "SELECT nombre_cliente, productos, accesorios, servicios FROM presupuesto WHERE id = ?",
-      args: [id_presupuesto]
-    });
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Presupuesto no encontrado" });
-    }
-
-    const { nombre_cliente, productos, accesorios, servicios } = result.rows[0];
-
-    // 2️⃣ Construir la descripción concatenada
-    const descripcion = [productos, accesorios, servicios].filter(Boolean).join(', ');
-
-    // 3️⃣ Insertar los datos en la tabla OT
-    const ot = await db.client.execute({
-      sql: `INSERT INTO OT (id_cliente, descripcion, estado, creacion, modificacion, id_presupuesto)  
-            VALUES (?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)`,
-      args: [nombre_cliente, descripcion, id_presupuesto],
-    });
-
-    res.json({ success: true, message: "OT generada correctamente", otId: ot.lastInsertRowid });
-
-  } catch (error) {
-    console.error("Error al agregar orden de trabajo:", error);
-    res.status(500).json({ error: "Error al agregar la orden de trabajo" });
-  }
-});
-
-
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
