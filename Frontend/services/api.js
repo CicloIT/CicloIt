@@ -403,11 +403,11 @@ export const registrarReclamo = async (data) => {
         throw new Error(error || "Error al agregar servicio")
       }
     } catch (error) {
-      
+      console.error(error);
+      throw error;
     }
   }
 
-/*
   export const generarOT = async (idPresupuesto) => {
     try {
       const respuesta = await fetch(`${API_URL}/agregar-ot`, {
@@ -422,4 +422,3 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
-  */

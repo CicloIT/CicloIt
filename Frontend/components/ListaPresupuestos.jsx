@@ -43,7 +43,7 @@ function ListaPresupuestos() {
       const respuesta = await generarOT(idPresupuesto);
       alert(respuesta.message); // Muestra mensaje de éxito o error
     } catch (error) {
-      alert('Error al generar la OT');
+      alert('Error al generar la OT',error);
     } finally {
       setLoadingOT(null); // Restablece el estado
     }
