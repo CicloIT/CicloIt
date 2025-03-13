@@ -406,3 +406,20 @@ export const registrarReclamo = async (data) => {
       
     }
   }
+
+
+  export const generarOT = async (idPresupuesto) => {
+    try {
+      const respuesta = await fetch(`${API_URL}/agregar-ot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_presupuesto: idPresupuesto }),
+      });
+  
+      return await respuesta.json();
+    } catch (error) {
+      console.error('Error al generar OT:', error);
+      throw error;
+    }
+  };
+  

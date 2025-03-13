@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { obtenerPresupuestos } from '../services/api'; // Asegúrate de crear esta función en tu servicio de API
+import { obtenerPresupuestos, generarOT } from '../services/api'; // Agregamos generarOT
 import { useNavigate } from 'react-router-dom';
 
 function ListaPresupuestos() {
   const [presupuestos, setPresupuestos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingOT, setLoadingOT] = useState(null); // Estado para manejar el botón
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,27 +15,38 @@ function ListaPresupuestos() {
         setLoading(true);
         const datos = await obtenerPresupuestos();
         
-        // Si la respuesta es un arreglo vacío, no hacemos nada
         if (Array.isArray(datos) && datos.length > 0) {
           setPresupuestos(datos);
           setError(null);
         } else {
-          setPresupuestos([]);  // No hay presupuestos, dejamos el arreglo vacío          
+          setPresupuestos([]);
         }
       } catch (err) {
-        console.error('Error al cargar presupuestos front:', err);
-        setError('No se pudieron cargar los presupuestos front');
+        console.error('Error al cargar presupuestos:', err);
+        setError('No se pudieron cargar los presupuestos');
       } finally {
         setLoading(false);
       }
     };
-    
 
     cargarPresupuestos();
   }, []);
 
   const handleVerDetalle = (id) => {
     navigate(`/ver-presupuesto-detalles/${id}`);
+  };
+
+  const handleGenerarOT = async (idPresupuesto) => {
+    setLoadingOT(idPresupuesto); // Indica que este presupuesto está en proceso
+
+    try {
+      const respuesta = await generarOT(idPresupuesto);
+      alert(respuesta.message); // Muestra mensaje de éxito o error
+    } catch (error) {
+      alert('Error al generar la OT');
+    } finally {
+      setLoadingOT(null); // Restablece el estado
+    }
   };
 
   if (loading) {
@@ -75,12 +87,20 @@ function ListaPresupuestos() {
                   <td className="p-3 text-right">
                     ${presupuesto.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className="p-3 text-center">
+                  <td className="p-3 text-center space-x-2">
                     <button
                       onClick={() => handleVerDetalle(presupuesto.id)}
                       className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                     >
                       Ver Detalle
+                    </button>
+
+                    <button
+                      onClick={() => handleGenerarOT(presupuesto.id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+                      disabled={loadingOT === presupuesto.id} // Deshabilita mientras carga
+                    >
+                      {loadingOT === presupuesto.id ? 'Generando...' : 'Generar OT'}
                     </button>
                   </td>
                 </tr>
