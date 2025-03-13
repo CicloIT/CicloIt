@@ -407,7 +407,7 @@ export const registrarReclamo = async (data) => {
     }
   }
 
-
+/*
   export const generarOT = async (idPresupuesto) => {
     try {
       const respuesta = await fetch(`${API_URL}/agregar-ot`, {
@@ -422,4 +422,4 @@ export const registrarReclamo = async (data) => {
       throw error;
     }
   };
-  
+  */

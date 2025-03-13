@@ -827,7 +827,6 @@ app.post("/agregar_producto", async (req, res) => {
   }
 });
 
-
 //Productos, servicios y accesorios
 app.post("/agregar_servicios", async (req, res) => {
   const { nombre, precio_por_hora} = req.body;  
