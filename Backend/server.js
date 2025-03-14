@@ -523,12 +523,13 @@ app.post("/agregar_servicios", async (req, res) => {
     res.status(500).json({ error: "Error al agregar el producto" });
   }
 });
+
 app.post("/agregar_ot", async (req, res) => {
-  const { id_presupuesto } = req.body; // Asegúrate de enviar el ID en el body
+  const { id_presupuesto,id_usuario, importancia  } = req.body; // Asegúrate de enviar el ID en el body
   if (!id_presupuesto) {
     return res.status(400).json({ error: "ID de presupuesto requerido" });
   }
-
+  console.log(id_usuario, importancia);
   try {
     // 1️⃣ Obtener los datos del presupuesto desde la base de datos de presupuesto
     const presupuestoResult = await db.presupuesto.execute({
@@ -560,9 +561,10 @@ app.post("/agregar_ot", async (req, res) => {
     // 4️⃣ Insertar los datos en la tabla OT en la base de datos de clientes
     const ot = await db.client.execute({
       sql: `INSERT INTO orden_trabajo (id_cliente, importancia, descripcion, estado, creacion, modificacion, id_presupuesto, id_usuario)  
-            VALUES (?, 'baja', ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1)`,
-      args: [id_cliente, descripcion, id_presupuesto], // Usamos id_cliente directamente
+            VALUES (?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)`,
+      args: [id_cliente, importancia, descripcion, id_presupuesto, id_usuario], // Usamos los valores de importancia y id_usuario recibidos
     });
+    
 
     res.json({ success: true, message: "OT generada correctamente", otId: Number(ot.lastInsertRowid) });
 

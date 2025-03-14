@@ -1,5 +1,5 @@
-const API_URL = 'https://ciclo-it-v1.vercel.app';
-/*const API_URL_ORDENES = 'http://localhost:3000'; */
+const API_URL = 'ciclo-it.vercel.app';
+/*const API_URL = 'http://localhost:3000'; */
 export const login = async (data) => {
   try {
       const response = await fetch(`${API_URL}/login`, {
@@ -407,12 +407,15 @@ export const registrarReclamo = async (data) => {
     }
   }
 
-  export const generarOT = async (idPresupuesto) => {
+  export const generarOT = async (idPresupuesto, usuarioSeleccionado, importanciaSeleccionada) => {
     try {
       const respuesta = await fetch(`${API_URL}/agregar_ot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_presupuesto: idPresupuesto }),
+        body: JSON.stringify({ 
+          id_presupuesto: idPresupuesto,
+          id_usuario: usuarioSeleccionado, // Asegúrate de que este sea el id del usuario
+          importancia: importanciaSeleccionada, }),
       });
       const data = await respuesta.json();
       console.log(data)
