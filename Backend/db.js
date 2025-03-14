@@ -1,19 +1,18 @@
 import dotenv from 'dotenv';
-import { createClient } from '@libsql/client';
+import { createClient } from '@libsql/client/web';
 
 dotenv.config();
 
 // Configura el cliente para productos, servicios y accesorios
 const client = createClient({
-  url: 'libsql://cicloit-samuelnar.turso.io',   
-  authToken: process.env.DB_TOKEN,  // Token de autenticación para la base de datos de productos, servicios, etc.
+  url: 'https://cicloit-samuelnar.turso.io',   
+  authToken: process.env.DB_TOKEN,
 });
 
 // Configura el cliente para presupuestos
 const presupuesto = createClient({
-  url: 'libsql://presupuesto-samuelnar.turso.io',
-  authToken: process.env.DB_TOKEN_PRESUPUESTO  // Token de autenticación para la base de datos de presupuestos
+  url: 'https://presupuesto-samuelnar.turso.io',
+  authToken: process.env.DB_TOKEN_PRESUPUESTO,
 });
 
-// Exportamos ambas conexiones para su uso en otros archivos
 export default { client, presupuesto };
