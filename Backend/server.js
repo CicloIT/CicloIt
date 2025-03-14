@@ -847,6 +847,7 @@ app.post("/agregar_servicios", async (req, res) => {
   }
 });
 
+/*
 app.post("/agregar_ot", async (req, res) => {
   const { id_presupuesto } = req.body; // Asegúrate de enviar el ID en el body
   if (!id_presupuesto) {
@@ -895,7 +896,7 @@ app.post("/agregar_ot", async (req, res) => {
     console.error("Error al agregar orden de trabajo:", error);
     res.status(500).json({ error: "Error al agregar la orden de trabajo" });
   }
-});
+});*/
 
 
 app.listen(port, () => {
