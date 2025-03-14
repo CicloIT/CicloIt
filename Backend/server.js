@@ -3,18 +3,14 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import rateLimit from "express-rate-limit";
 import db from "./db.js";
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const app = express();
 const port = 3000;
-
 // Middleware
 app.use(express.json());
 app.use(cors());
-
-
 
 app.post("/login", async (req, res) => {
   const { nombre, contrasena } = req.body;
