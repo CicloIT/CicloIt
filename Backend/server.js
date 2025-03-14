@@ -330,11 +330,7 @@ const port = 3000;
 app.use(express.json());
 app.use(cors());
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { error: "Demasiados intentos, intenta más tarde" },
-});
+/*
 
 app.post("/login", async (req, res) => {
   const { nombre, contrasena } = req.body;
