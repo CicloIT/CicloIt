@@ -378,7 +378,7 @@ const verificarToken = (req, res, next) => {
     res.status(401).json({ error: "Token inválido o expirado" });
   }
 };
-
+/*
 app.post("/registro", async (req, res) => {
   const { nombre, apellido, password, rol } = req.body;
 
@@ -593,8 +593,9 @@ app.post("/clientes", async (req, res) => {
   }
 });
 
-
+/*
 /* Presupuesto */
+/*
 app.post("/presupuestos", verificarToken, async (req, res) => {
   const { nombreCliente, descripcion, productos, servicios, accesorios, total} = req.body;
   // Convertir total a número real para mayor seguridad
@@ -846,8 +847,6 @@ app.post("/agregar_servicios", async (req, res) => {
     res.status(500).json({ error: "Error al agregar el producto" });
   }
 });
-
-/*
 app.post("/agregar_ot", async (req, res) => {
   const { id_presupuesto } = req.body; // Asegúrate de enviar el ID en el body
   if (!id_presupuesto) {
@@ -897,7 +896,6 @@ app.post("/agregar_ot", async (req, res) => {
     res.status(500).json({ error: "Error al agregar la orden de trabajo" });
   }
 });*/
-
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
