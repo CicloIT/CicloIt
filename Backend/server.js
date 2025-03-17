@@ -579,15 +579,15 @@ app.put("/actualizarOrden/:id", async (req, res) => {
   const { id } = req.params;
   const { importancia, estado, id_usuario } = req.body;
 
-  if (!importancia || !estado || id_usuario) {
+  if (!importancia || !estado || !id_usuario) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
   try {
     const result = await db.client.execute({
       sql: `
-        UPDATE ordene_trabajo 
+        UPDATE orden_trabajo 
         SET importancia = ?, estado = ?, id_usuario = ?
-        WHERE orden_id = ?
+        WHERE id = ?
       `,
       args: [importancia, estado, id_usuario, id],
     });

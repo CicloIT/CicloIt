@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { obtenerOrdenes, listaUsuarios, actualizarOrden } from "../services/api"; // Asumiendo que tienes una función para actualizar las órdenes
+import { obtenerOrdenes, listaUsuarios, actualizarOrden } from "../services/api";
 import { format } from "date-fns";
 
 function OrdenTrabajo() {
@@ -13,7 +13,7 @@ function OrdenTrabajo() {
     estado: '',
     nombreCliente: ''
   });
-  const [ordenEditada, setOrdenEditada] = useState(null); // Estado para la orden que estamos editando
+  const [ordenEditada, setOrdenEditada] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,23 +35,34 @@ function OrdenTrabajo() {
   }, []);
 
   const handleEditar = (orden) => {
-    setOrdenEditada(orden);
+    // Asegúrate de que usuario_id sea el ID y no el nombre
+    setOrdenEditada({
+      ...orden,
+      usuario_id: orden.id_usuario // Asegúrate de que este campo exista
+    });
   };
 
   const handleGuardarEdicion = async () => {
     try {
+      // Asegúrate de enviar el campo correcto según tu API
       await actualizarOrden(ordenEditada.orden_id, {
         importancia: ordenEditada.importancia,
         estado: ordenEditada.estado,
-        usuario_id: ordenEditada.usuario_id, // Se usa el ID del usuario asignado
+        id_usuario: ordenEditada.usuario_id, // Cambiado a id_usuario para coincidir con el endpoint
       });
 
+      // Actualiza el estado local solo después de una actualización exitosa
       setOrdenes((prev) => prev.map(o => 
-        o.orden_id === ordenEditada.orden_id ? ordenEditada : o
+        o.orden_id === ordenEditada.orden_id ? {
+          ...ordenEditada,
+          // Actualiza el nombre del usuario si cambió
+          nombre_usuario_asignado: usuarios.find(u => u.id === parseInt(ordenEditada.usuario_id))?.nombre || o.nombre_usuario_asignado
+        } : o
       ));
 
       setOrdenEditada(null);
     } catch (error) {
+      console.error("Error al actualizar la orden:", error);
       alert("Error al actualizar la orden");
     }
   };
@@ -64,12 +75,11 @@ function OrdenTrabajo() {
     }));
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setOrdenEditada(prev => ({
       ...prev,
-      [name]: name === "usuario_id" ? Number(value) : value, // Asegura que usuario_id sea un número
+      [name]: value
     }));
   };
 
@@ -93,7 +103,6 @@ function OrdenTrabajo() {
       </h2>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
-        {/* Filtros */}
         <div className="flex flex-col">
           <input
             type="text"
@@ -231,7 +240,7 @@ function OrdenTrabajo() {
                 className="p-2 border rounded shadow-sm w-full"
               >
                 {usuarios.map(usuario => (
-                  <option key={usuario.id} value={usuario.nombre}>
+                  <option key={usuario.id} value={usuario.id}>
                     {usuario.nombre}
                   </option>
                 ))}

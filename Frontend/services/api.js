@@ -1,5 +1,5 @@
 const API_URL = 'https://ciclo-it.vercel.app';
-/*const API_URL = 'http://localhost:3000'; */
+//const API_URL = 'http://localhost:3000';
 export const login = async (data) => {
   try {
       const response = await fetch(`${API_URL}/login`, {
@@ -430,24 +430,20 @@ export const registrarReclamo = async (data) => {
     }
   };
 
-
-  export const actualizarOrden = async (id, datosActualizados) => {
-    try {
-      const respuesta = await fetch(`${API_URL}/actualizarOrden/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(datosActualizados),
-      });
+  // En tu archivo de servicios API
+export const actualizarOrden = async (id, datos) => {
+  const response = await fetch(`${API_URL}/actualizarOrden/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(datos),
+  });
   
-      if (!respuesta.ok) {
-        throw new Error("No se pudo actualizar la orden");
-      }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Error al actualizar la orden');
+  }
   
-      return await respuesta.json();
-    } catch (error) {
-      console.error("Error al actualizar la orden:", error);
-      throw error;
-    }
-  };
+  return await response.json();
+};
