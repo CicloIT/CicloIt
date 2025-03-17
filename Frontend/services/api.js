@@ -433,7 +433,7 @@ export const registrarReclamo = async (data) => {
 
   export const actualizarOrden = async (id, datosActualizados) => {
     try {
-      const respuesta = await fetch(`${API_URL}/ordenes/${id}`, {
+      const respuesta = await fetch(`${API_URL}/actualizarOrden/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
