@@ -159,7 +159,7 @@ function OrdenTrabajo() {
                   <span className="font-semibold">Cliente:</span> {orden.empresa}
                 </p>
                 <p className="text-sm">
-                  <span className="font-semibold">Asignado a:</span> {usuarios.find(u => u.id === orden.usuario_id)?.nombre || "Sin asignar"}
+                  <span className="font-semibold">Asignado a:</span> {orden.nombre_usuario_asignado}
                 </p>
                 <p className="text-sm">
                   <span className="font-semibold">Importancia:</span> 

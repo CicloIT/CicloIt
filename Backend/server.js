@@ -579,7 +579,7 @@ app.put("/actualizarOrden/:id", async (req, res) => {
   const { id } = req.params;
   const { importancia, estado, id_usuario } = req.body;
 
-  if (!importancia || !estado || !nombre_usuario_asignado) {
+  if (!importancia || !estado || id_usuario) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
   try {
