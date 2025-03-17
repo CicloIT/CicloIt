@@ -575,6 +575,35 @@ app.post("/agregar_ot", async (req, res) => {
   }
 });
 
+app.put("/actualizarOrden/:id", async (req, res) => {
+  const { id } = req.params;
+  const { importancia, estado, id_usuario } = req.body;
+
+  if (!importancia || !estado || !nombre_usuario_asignado) {
+    return res.status(400).json({ error: "Todos los campos son obligatorios" });
+  }
+  try {
+    const result = await db.client.execute({
+      sql: `
+        UPDATE ordene_trabajo 
+        SET importancia = ?, estado = ?, id_usuario = ?
+        WHERE orden_id = ?
+      `,
+      args: [importancia, estado, id_usuario, id],
+    });
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ error: "Orden no encontrada" });
+    }
+
+    res.json({ mensaje: "Orden actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar la orden:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+ 
+});
+
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });

@@ -73,6 +73,13 @@ const Navbar = ({ rol, setRol }) => {
                   onToggle={() => toggleDropdown('view')}
                   id="view"
                 />
+                <DropdownMenu 
+                  isOpen={state.dropdowns.add}
+                  title="Crear"
+                  options={MENU_OPTIONS.add}  
+                  onToggle={() => toggleDropdown('add')}
+                  id="add"
+                />
               </>
             )}
             
