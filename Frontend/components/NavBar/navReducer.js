@@ -4,8 +4,10 @@ export const initialNavState = {
     dropdowns: {
       register: false,
       view: false,
+      add:false,
       mobileRegister: false,
-      mobileView: false
+      mobileView: false,
+      mobileAdd:false
     }
   };
   

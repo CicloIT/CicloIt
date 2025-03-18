@@ -377,8 +377,7 @@ export const registrarReclamo = async (data) => {
         throw new Error(errorText || 'Error al agregar el producto');
       }
       
-      const data = await response.json();
-      console.log("Producto agregado:", data);
+      const data = await response.json();      
       return data;      
     } catch (error) {
       console.error('Error detallado:', error);
@@ -417,8 +416,7 @@ export const registrarReclamo = async (data) => {
           id_usuario: usuarioSeleccionado, // Asegúrate de que este sea el id del usuario
           importancia: importanciaSeleccionada, }),
       });
-      const data = await respuesta.json();
-      console.log(data)
+      const data = await respuesta.json();      
       if (!respuesta.ok) {
         throw new Error(data.error || 'Error al generar la OT');
       }

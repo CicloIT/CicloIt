@@ -220,8 +220,7 @@ function CrearPresupuesto() {
       productos: productosConCantidad,
       servicios: serviciosConHoras,
       accesorios: accesoriosConCantidad,
-    };
-    console.log("data", data);
+    };    
     try {
       await registrarPresupuesto(data);
       navigate('/');

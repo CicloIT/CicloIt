@@ -13,10 +13,8 @@ function DetallePresupuesto() {
   useEffect(() => {
     const fetchPresupuesto = async () => {
       try {
-        const data = await obtenerPresupuestoId(id);
-        console.log('Datos del presupuesto:', data);       
-        setPresupuesto(data)
-        console.log('Presupuesto cargado:', data);
+        const data = await obtenerPresupuestoId(id);        
+        setPresupuesto(data)        
         setLoading(false);
       } catch (err) {
         setError('Error al cargar los detalles del presupuesto');
@@ -37,14 +35,14 @@ function DetallePresupuesto() {
   const handlePrint = () => {
     window.print();
   };
-
+  const cotizacion = presupuesto?.dolares > 0 ? presupuesto.total / presupuesto.dolares : 1;
   if (loading) return <p className="text-center text-lg text-gray-600">Cargando detalles...</p>;
   if (error) return <p className="text-cesnter text-red-600">{error}</p>;
   if (!presupuesto) return <p className="text-center text-lg text-gray-600">Presupuesto no encontrado.</p>;
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 shadow-lg rounded-lg relative">
       <h2 className="text-4xl font-semibold text-center mb-8 text-blue-600">Detalles del Presupuestos</h2>
-      
+
       {/* Título Ciclo IT en esquina */}
       <div className="absolute top-4 lefts-4 text-lg font-bold text-gray-600">Ciclo IT</div>
       <div className="">CUIT: 27-42787410-4</div>
@@ -53,7 +51,7 @@ function DetallePresupuesto() {
         <p className="text-xl font-medium">Cuit: <span className="font-bold">{presupuesto.cuit}</span></p>
         <p className="text-xl font-medium">Tipo IVA: <span className="font-bold">{presupuesto.tipo_iva}</span></p>
         <p className='text-xl font-medium'>Presupuesto Num: <span className='font-bold'>{presupuesto.id}</span></p>
-        <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>       
+        <p className="text-xl font-medium">Fecha: <span className="font-bold">{new Date(presupuesto.fecha).toLocaleDateString()}</span></p>
       </div>
 
       {/* Sección de Productos */}
@@ -65,12 +63,23 @@ function DetallePresupuesto() {
             const cantidadYPrecio = detalles.replace(')', '').split(' x $');
             const cantidad = cantidadYPrecio[0] || 1;
             const precio = cantidadYPrecio[1] || 0;
-
+            const precioUnitarioDolares = cotizacion > 0 ? precio / cotizacion : precio;               
+            const subtotalDolares = cotizacion > 0 ? (precio * cantidad) / cotizacion : precio * cantidad;
+            
             return (
               <div key={index} className="border-b border-gray-200 py-4">
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
-                <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
-                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+                {presupuesto.dolares > 0 ? (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precioUnitarioDolares)}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(subtotalDolares)}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+                  </>
+                )}                  
               </div>
             );
           })
@@ -86,12 +95,24 @@ function DetallePresupuesto() {
           presupuesto.servicios.split(', ').map((servicio, index) => {
             const [nombre, detalles] = servicio.split(' (');
             const [horas, precioPorHora] = detalles.replace(')', '').split(' horas a $');
-
+            const precioPorHoraNumerico = parseFloat(precioPorHora.replace(/[^0-9.-]+/g, ''));           
+            const precioUnitarioDolaresSer = cotizacion > 0 ? precioPorHoraNumerico / cotizacion : precioPorHoraNumerico;                       
+            const subtotalDolaresSer = cotizacion > 0 ? (precioPorHoraNumerico * horas) / cotizacion : precioPorHoraNumerico * horas;
             return (
               <div key={index} className="border-b border-gray-200 py-4">
-                <p className="text-lg font-semibold text-gray-800">{nombre} - Horas: {horas}</p>
-                <p className="text-sm text-gray-600">Precio por hora: {formatCurrency(precioPorHora)}</p>
-                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precioPorHora) * horas)}</p>
+                <p className="text-lg font-semibold text-gray-800">{nombre} - Horas: {horas}</p>     
+                  
+                {presupuesto.dolares > 0 ? (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario dolar: {formatCurrency(precioUnitarioDolaresSer)}</p>
+                    <p className="text-sm text-gray-600">Subtotal dolar: {formatCurrency(subtotalDolaresSer)}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precioPorHora)}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precioPorHora) * horas)}</p>
+                  </>
+                )}                                 
               </div>
             );
           })
@@ -109,12 +130,22 @@ function DetallePresupuesto() {
             const cantidadYPrecio = detalles.replace(')', '').split(' x $');
             const cantidad = cantidadYPrecio[0] || 1;
             const precio = cantidadYPrecio[1] || 0;
-
+            const precioUnitarioDolaresA = cotizacion > 0 ? precio / cotizacion : precio;
+            const subtotalDolaresA = cotizacion > 0 ? (precio * cantidad) / cotizacion : precio * cantidad;
             return (
               <div key={index} className="border-b border-gray-200 py-4">
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
-                <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
-                <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+                {presupuesto.dolares > 0 ? (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precioUnitarioDolaresA)}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(subtotalDolaresA)}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precio)}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(parseFloat(precio) * cantidad)}</p>
+                  </>
+                )}                 
               </div>
             );
           })
@@ -122,10 +153,17 @@ function DetallePresupuesto() {
           <p>No hay accesorios en este presupuesto</p>
         )}
       </div>
-      <p className="text-xl font-medium">Total: <span className="font-bold text-green-600">{formatCurrency(presupuesto.total)}</span></p>
+      <p className="text-xl font-medium">Total:
+        <span className="font-bold text-green-600">
+          {presupuesto.dolares
+            ? ` US$${presupuesto.dolares.toFixed(4)}` // Si existe "presupuesto.dolares", mostrarlo
+            : formatCurrency(presupuesto.total) // Si no, mostrar "presupuesto.total"
+          }
+        </span>
+      </p>
       <div className="text-center">
-        <button 
-          onClick={() => navigate('/')} 
+        <button
+          onClick={() => navigate('/')}
           className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-300 button-volver"
         >
           Volver
@@ -136,9 +174,9 @@ function DetallePresupuesto() {
           className="ml-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition duration-300 button-imprimir"
         >
           Imprimir
-        </button>  
+        </button>
       </div>
-           
+
       {/* Condiciones comerciales solo visibles en la impresión */}
       <div className="condiciones-imprimir">
         <h3 className="text-lg font-bold text-gray-600 text-center mt-8">Condiciones Comerciales</h3>

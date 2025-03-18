@@ -43,8 +43,7 @@ const Navbar = ({ rol, setRol }) => {
   // Función para alternar dropdown
   const toggleDropdown = useCallback((name) => {
     dispatch({ type: 'TOGGLE_DROPDOWN', payload: name });
-  }, []);
-  
+  }, []);  
   return (
     <nav className="bg-slate-900 shadow-lg sticky top-0 z-50  navbar" ref={navRef}>
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -131,7 +130,7 @@ const Navbar = ({ rol, setRol }) => {
           state.isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="px-3 py-4 space-y-2 bg-slate-800 shadow-xl rounded-b-lg">
+        <div className="px-3 py-4 space-y-2 bg-slate-800 shadow-xl rounded-b-lg">      
           {rol === "admin" && (
             <>
               <MobileDropdown 
@@ -148,6 +147,15 @@ const Navbar = ({ rol, setRol }) => {
                 title="Ver"
                 options={MENU_OPTIONS.view}
                 onToggle={() => toggleDropdown('mobileView')}
+                activeRoute={activeRoute}
+                closeMenu={closeMobileMenu}
+              />
+
+              <MobileDropdown 
+                isOpen={state.dropdowns.mobileAdd}
+                title="Crear"
+                options={MENU_OPTIONS.add}
+                onToggle={() => toggleDropdown('mobileAdd')}
                 activeRoute={activeRoute}
                 closeMenu={closeMobileMenu}
               />

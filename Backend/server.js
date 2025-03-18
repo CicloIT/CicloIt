@@ -273,11 +273,10 @@ app.post("/clientes", async (req, res) => {
 /* Presupuesto */
 
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios, total,cotizacion} = req.body;
+  const { nombreCliente, descripcion, productos, servicios, accesorios, total,cotizacionDolar} = req.body;
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
-  const cotizacionDolar = parseFloat(cotizacion);
-
+  const cotizacionDolars = parseFloat(cotizacionDolar);  
   // Validación para asegurarse de que se haya seleccionado al menos un producto, servicio o accesorio
   if (!productos.length && !servicios.length && !accesorios.length) {
     return res.status(400).json({ error: "Debe incluir al menos un producto, servicio o accesorio" });
@@ -321,10 +320,10 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     serviciosText = serviciosText ? serviciosText.slice(0, -2) : "";
     accesoriosText = accesoriosText ? accesoriosText.slice(0, -2) : "";
     const estado = "pendiente"; 
-    const totalDolares = totalPresupuesto / cotizacionDolar;
+    const totalDolares = totalPresupuesto / cotizacionDolars;    
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado,dolares) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado,dolares) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto, estado,totalDolares]
     });
 
@@ -456,9 +455,7 @@ app.put("/actualizar-contrasena", async (req, res) => {
 
   try {
     // Hash de la nueva contraseña
-    const hashedPassword = await bcrypt.hash(nuevaContra, 10);
-    console.log("Contraseña hasheada:", hashedPassword);
-
+    const hashedPassword = await bcrypt.hash(nuevaContra, 10);    
     // Ejecutar la consulta para actualizar la contraseña
     const result = await db.client.execute({
       sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
@@ -532,8 +529,7 @@ app.post("/agregar_ot", async (req, res) => {
   const { id_presupuesto,id_usuario, importancia  } = req.body; // Asegúrate de enviar el ID en el body
   if (!id_presupuesto) {
     return res.status(400).json({ error: "ID de presupuesto requerido" });
-  }
-  console.log(id_usuario, importancia);
+  }  
   try {
     // 1️⃣ Obtener los datos del presupuesto desde la base de datos de presupuesto
     const presupuestoResult = await db.presupuesto.execute({

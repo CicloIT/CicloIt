@@ -56,8 +56,7 @@ function ListaPresupuestos() {
       if (!usuarioSeleccionado) {
         alert('Por favor seleccione un usuario');
         return;
-      }
-      console.log('Generando OT para el presupuesto:', idPresupuesto, usuarioSeleccionado, importanciaSeleccionada);
+      }      
       await generarOT(idPresupuesto, usuarioSeleccionado, importanciaSeleccionada);
       setShowModal(false); // Cerrar el modal después de generar la OT
     } catch (error) {
@@ -103,8 +102,12 @@ function ListaPresupuestos() {
                   <td className="p-3">{presupuesto.nombre_cliente}</td>
                   <td className="p-3">{presupuesto.descripcion}</td>
                   <td className="p-3 text-right">
-                    ${presupuesto.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
+                    {presupuesto.dolares ? (
+                      `US$${presupuesto.dolares.toFixed(4)}`
+                    ):(
+                    `$${presupuesto.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    )}                  
+                  </td>                                   
                   <td className="p-3 text-center space-x-2 flex flex-wrap justify-center gap-2">
   <button
     onClick={() => handleVerDetalle(presupuesto.id)}
