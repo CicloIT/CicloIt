@@ -13,7 +13,6 @@ export const login = async (data) => {
       if (!response.ok) {
           throw new Error('Error al loguear');
       }
-
       const result = await response.json();
       localStorage.setItem('token', result.token); // Guardamos el token
       return result;

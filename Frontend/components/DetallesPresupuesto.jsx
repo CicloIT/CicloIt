@@ -71,8 +71,8 @@ function DetallePresupuesto() {
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
                 {presupuesto.dolares > 0 ? (
                   <>
-                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precioUnitarioDolares)}</p>
-                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(subtotalDolares)}</p>
+                    <p className="text-sm text-gray-600">Precio unitario: {`US$${(precioUnitarioDolares.toFixed(2))}`}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {`US$ ${(subtotalDolares).toFixed(2)}`}</p>
                   </>
                 ) : (
                   <>
@@ -104,8 +104,8 @@ function DetallePresupuesto() {
                   
                 {presupuesto.dolares > 0 ? (
                   <>
-                    <p className="text-sm text-gray-600">Precio unitario dolar: {formatCurrency(precioUnitarioDolaresSer)}</p>
-                    <p className="text-sm text-gray-600">Subtotal dolar: {formatCurrency(subtotalDolaresSer)}</p>
+                    <p className="text-sm text-gray-600">Precio unitario: {`US$ ${(precioUnitarioDolaresSer.toFixed(2))}`}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {`US$ ${(subtotalDolaresSer.toFixed(2))}`}</p>
                   </>
                 ) : (
                   <>
@@ -137,8 +137,8 @@ function DetallePresupuesto() {
                 <p className="text-lg font-semibold text-gray-800">{nombre} - Cantidad: {cantidad}</p>
                 {presupuesto.dolares > 0 ? (
                   <>
-                    <p className="text-sm text-gray-600">Precio unitario: {formatCurrency(precioUnitarioDolaresA)}</p>
-                    <p className="text-sm text-gray-600">Subtotal: {formatCurrency(subtotalDolaresA)}</p>
+                    <p className="text-sm text-gray-600">Precio unitario: {`US$${(precioUnitarioDolaresA.toFixed(2))}`}</p>
+                    <p className="text-sm text-gray-600">Subtotal: {`US$ ${(subtotalDolaresA.toFixed(2))}`}</p>
                   </>
                 ) : (
                   <>
@@ -156,7 +156,7 @@ function DetallePresupuesto() {
       <p className="text-xl font-medium">Total:
         <span className="font-bold text-green-600">
           {presupuesto.dolares
-            ? ` US$${presupuesto.dolares.toFixed(4)}` // Si existe "presupuesto.dolares", mostrarlo
+            ? ` US$${presupuesto.dolares.toFixed(2)}` // Si existe "presupuesto.dolares", mostrarlo
             : formatCurrency(presupuesto.total) // Si no, mostrar "presupuesto.total"
           }
         </span>
