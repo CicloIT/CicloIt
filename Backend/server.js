@@ -273,9 +273,10 @@ app.post("/clientes", async (req, res) => {
 /* Presupuesto */
 
 app.post("/presupuestos", verificarToken, async (req, res) => {
-  const { nombreCliente, descripcion, productos, servicios, accesorios, total} = req.body;
+  const { nombreCliente, descripcion, productos, servicios, accesorios, total,cotizacion} = req.body;
   // Convertir total a número real para mayor seguridad
   const totalPresupuesto = parseFloat(total);
+  const cotizacionDolar = parseFloat(cotizacion);
 
   // Validación para asegurarse de que se haya seleccionado al menos un producto, servicio o accesorio
   if (!productos.length && !servicios.length && !accesorios.length) {
@@ -320,10 +321,11 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
     serviciosText = serviciosText ? serviciosText.slice(0, -2) : "";
     accesoriosText = accesoriosText ? accesoriosText.slice(0, -2) : "";
     const estado = "pendiente"; 
+    const totalDolares = totalPresupuesto / cotizacionDolar;
     // Paso 4: Insertar el presupuesto en la tabla `presupuesto`
     const resultPresupuesto = await db.presupuesto.execute({
-      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto, estado]
+      sql: "INSERT INTO presupuesto (nombre_cliente, descripcion, productos, servicios, accesorios, total, estado,dolares) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      args: [nombreCliente, descripcion, productosText, serviciosText, accesoriosText, totalPresupuesto, estado,totalDolares]
     });
 
     // Obtener el ID del presupuesto insertado
@@ -352,9 +354,11 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
 
     // Devolver la respuesta con el ID del presupuesto creado
     res.status(201).json({ 
-      presupuestoId: Number(presupuestoId), 
-      total: totalPresupuesto, 
-      message: "Presupuesto creado exitosamente" 
+      presupuestoId: Number(presupuestoId),
+      totalPesos: totalPresupuesto,
+      totalDolares: totalDolares,
+      cotizacionDolar: cotizacionDolar,
+      message: "Presupuesto creado exitosamente"
     });
 
   } catch (error) {

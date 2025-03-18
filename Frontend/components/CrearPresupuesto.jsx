@@ -13,6 +13,11 @@ function CrearPresupuesto() {
   const [servicios, setServicios] = useState([]);
   const [accesorios, setAccesorios] = useState([]);
 
+  // Nuevos estados para manejar la moneda
+  const [moneda, setMoneda] = useState('pesos');
+  const [cotizacionDolar, setCotizacionDolar] = useState(1);
+  const [totalEnPesos, setTotalEnPesos] = useState(0);
+
   const [selectedProductos, setSelectedProductos] = useState([]);
   const [selectedServicios, setSelectedServicios] = useState([]);
   const [selectedAccesorios, setSelectedAccesorios] = useState([]);
@@ -64,7 +69,24 @@ function CrearPresupuesto() {
 
   useEffect(() => {
     setTotal(calcularTotal);
-  }, [calcularTotal]);
+    // Calcular el total en pesos siempre
+    if (moneda === 'dolares') {
+      setTotalEnPesos(calcularTotal / cotizacionDolar);
+    } else {
+      setTotalEnPesos(calcularTotal);
+    }
+  }, [calcularTotal, moneda, cotizacionDolar]);
+
+  // Función para manejar cambio de moneda
+  const handleMonedaChange = (e) => {
+    setMoneda(e.target.value);
+  };
+
+  // Función para manejar cambio en la cotización del dólar
+  const handleCotizacionChange = (e) => {
+    const valor = parseFloat(e.target.value) || 1;
+    setCotizacionDolar(valor);
+  };
 
   // Función de búsqueda mejorada
   const handleSearch = (e) => {
@@ -174,30 +196,32 @@ function CrearPresupuesto() {
     const productosConCantidad = selectedProductos.map(prod => ({
       ...prod,
       cantidad: productoCantidad[prod.id] || 1,
-      tipo: 'producto'  // Add this line
+      tipo: 'producto'
     }));
     
     const serviciosConHoras = selectedServicios.map(serv => ({
       ...serv,
       horas: servicioHoras[serv.id] || 1,
-      tipo: 'servicio'  // Add this line
+      tipo: 'servicio'
     }));
     
     const accesoriosConCantidad = selectedAccesorios.map(acc => ({
       ...acc,
       cantidad: accesorioCantidad[acc.id] || 1,
-      tipo: 'accesorio'  // Add this line
+      tipo: 'accesorio'
     }));
 
     const data = {
       nombreCliente,
       descripcion,
-      total,
+      total,      
+      moneda,
+      cotizacionDolar: cotizacionDolar,
       productos: productosConCantidad,
       servicios: serviciosConHoras,
       accesorios: accesoriosConCantidad,
     };
-    console.log("data",data)
+    console.log("data", data);
     try {
       await registrarPresupuesto(data);
       navigate('/');
@@ -208,7 +232,6 @@ function CrearPresupuesto() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-2xl border border-gray-100">
@@ -267,6 +290,55 @@ function CrearPresupuesto() {
           ></textarea>
         </div>
       </div>
+
+      {/* Moneda */}
+      <section className="bg-blue-50 p-6 rounded-lg border border-blue-200 shadow-sm">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Moneda</h3>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center space-x-3">
+            <input
+              type="radio"
+              id="pesos"
+              name="moneda"
+              value="pesos"
+              checked={moneda === 'pesos'}
+              onChange={handleMonedaChange}
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="pesos" className="text-gray-700 font-medium">Pesos</label>
+          </div>
+          <div className="flex items-center space-x-3">
+            <input
+              type="radio"
+              id="dolares"
+              name="moneda"
+              value="dolares"
+              checked={moneda === 'dolares'}
+              onChange={handleMonedaChange}
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="dolares" className="text-gray-700 font-medium">Dólares</label>
+          </div>
+        </div>
+
+        {moneda === 'dolares' && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="cotizacion">
+              Cotización del dólar (pesos por 1 dólar):
+            </label>
+            <input
+              type="number"
+              id="cotizacion"
+              min="1"
+              step="0.01"
+              value={cotizacionDolar}
+              onChange={handleCotizacionChange}
+              className="mt-1 p-3 w-full md:w-1/3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              placeholder="Ej: 950"
+            />
+          </div>
+        )}
+      </section>
   
       {/* Productos */}
       <section className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -428,9 +500,20 @@ function CrearPresupuesto() {
       </section>
   
       {/* Total */}
-      <div className="flex justify-between items-center mt-8">
-        <span className="font-medium text-xl text-gray-800">Total:</span>
-        <span className="text-2xl font-bold text-green-700">${total.toFixed(2)}</span>
+      <div className="flex flex-col bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex justify-between items-center">
+          <span className="font-medium text-xl text-gray-800">Total en {moneda === 'pesos' ? 'Pesos' : 'Dólares'}:</span>
+          <span className="text-2xl font-bold text-green-700">
+            {moneda === 'pesos' ? '$' : 'US$'}{totalEnPesos.toFixed(2)}
+          </span>
+        </div>
+        
+        {moneda === 'dolares' && (
+          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200">
+            <span className="font-medium text-lg text-gray-600">Total en dolares (cotización: {cotizacionDolar}):</span>
+            <span className="text-xl font-semibold text-blue-600">US${totalEnPesos.toFixed(2)}</span>
+          </div>
+        )}
       </div>
   
       {/* Submit */}
