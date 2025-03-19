@@ -271,7 +271,6 @@ app.post("/clientes", async (req, res) => {
 
 
 /* Presupuesto */
-
 app.post("/presupuestos", verificarToken, async (req, res) => {
   const { nombreCliente, descripcion, productos, servicios, accesorios, total,cotizacionDolar} = req.body;
   // Convertir total a número real para mayor seguridad
@@ -508,12 +507,12 @@ app.post("/agregar_producto", async (req, res) => {
 
 //Productos, servicios y accesorios
 app.post("/agregar_servicios", async (req, res) => {
-  const { nombre, precio_por_hora} = req.body;  
+  const { nombre, precio_por_hora,precio_con_iva} = req.body;  
   try { 
     const result = await db.presupuesto.execute(
       {
-        sql: "INSERT INTO servicios (nombre, precio_por_hora) VALUES (?, ?)",
-        args: [nombre, precio_por_hora]
+        sql: "INSERT INTO servicios (nombre, precio_por_hora,precio_con_iva) VALUES (?, ?, ?)",
+        args: [nombre, precio_por_hora,precio_con_iva]
       }
     );
     //pasamos el id de bigInt a numeber

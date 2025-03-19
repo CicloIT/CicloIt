@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
-import { agregarServicios } from '../services/api'; // Importamos tu función existente
+import { agregarServicios } from '../services/api';
 
 const AgregarServicio = () => {
   const [formData, setFormData] = useState({
     nombre: '',
-    precio_por_hora: ''
+    precio_por_hora: '',
+    precio_con_iva: '',
+    incluirIva: false
   });
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [cargando, setCargando] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    const { name, value, type, checked } = e.target;
+    
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        incluirIva: checked,
+        precio_con_iva: checked ? (prev.precio_por_hora * 1.21).toFixed(2) : ''
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        precio_con_iva: prev.incluirIva ? (value * 1.21).toFixed(2) : ''
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -22,41 +34,28 @@ const AgregarServicio = () => {
     setCargando(true);
     
     try {
-      // Validar que los campos no estén vacíos
       if (!formData.nombre || !formData.precio_por_hora) {
-        setMensaje({
-          texto: 'Por favor completa todos los campos',
-          tipo: 'error'
-        });
+        setMensaje({ texto: 'Por favor completa todos los campos', tipo: 'error' });
         setCargando(false);
         return;
       }
-      // Usar tu función existente para agregar el servicio
-      await agregarServicios(formData);            
-      // Mostrar mensaje de éxito
-      setMensaje({
-        texto: 'Servicio agregado exitosamente',
-        tipo: 'exito'
-      });
 
-      // Limpiar el formulario
+      await agregarServicios(formData);
+
+      setMensaje({ texto: 'Servicio agregado exitosamente', tipo: 'exito' });
+
       setFormData({
         nombre: '',
-        precio_por_hora: ''
+        precio_por_hora: '',
+        precio_con_iva: '',
+        incluirIva: false
       });
     } catch (error) {
       console.error('Error al agregar servicio:', error);
-      setMensaje({
-        texto: 'Error al agregar el servicio. Por favor intenta nuevamente.',
-        tipo: 'error'
-      });
+      setMensaje({ texto: 'Error al agregar el servicio. Por favor intenta nuevamente.', tipo: 'error' });
     } finally {
       setCargando(false);
-      
-      // Limpiar el mensaje después de 3 segundos
-      setTimeout(() => {
-        setMensaje({ texto: '', tipo: '' });
-      }, 3000);
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
     }
   };
 
@@ -80,8 +79,8 @@ const AgregarServicio = () => {
               required
             />
           </div>
-          
-          <div className="mb-6">
+
+          <div className="mb-4">
             <label htmlFor="precio_por_hora" className="block text-gray-700 font-medium mb-2">
               Precio por Hora ($):
             </label>
@@ -97,12 +96,44 @@ const AgregarServicio = () => {
               required
             />
           </div>
-          
+
+          {/* Checkbox para incluir IVA */}
+          <div className="mb-4 flex items-center">
+            <input
+              type="checkbox"
+              id="incluirIva"
+              name="incluirIva"
+              checked={formData.incluirIva}
+              onChange={handleChange}
+              className="mr-2"
+            />
+            <label htmlFor="incluirIva" className="text-gray-700 font-medium">
+              ¿Incluir IVA (21%)?
+            </label>
+          </div>
+
+          {/* Campo de precio con IVA (solo se muestra si se incluye IVA) */}
+          {formData.incluirIva && (
+            <div className="mb-6">
+              <label htmlFor="precio_con_iva" className="block text-gray-700 font-medium mb-2">
+                Precio con IVA ($):
+              </label>
+              <input
+                type="text"
+                id="precio_con_iva"
+                name="precio_con_iva"
+                value={formData.precio_con_iva}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md focus:outline-none"
+              />
+            </div>
+          )}
+
           <button 
             type="submit" 
             disabled={cargando} 
             className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-              cargando ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-green-500'
+              cargando ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-green-500'
             }`}
           >
             {cargando ? 'Agregando...' : 'Agregar Servicio'}
