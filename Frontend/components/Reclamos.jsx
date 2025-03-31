@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { obtenerReclamos, obtenerReclamosPorCliente, listaUsuarios } from "../services/api";
+import { obtenerReclamos, obtenerReclamosPorCliente, obtenerUsuarios } from "../services/api";
 import { format } from "date-fns";
 
 function Reclamos() {
@@ -28,7 +28,7 @@ function Reclamos() {
           // Si el usuario es un administrador, obtenemos todos los reclamos
           reclamosData = await obtenerReclamos();
         }
-        const usuariosData = await listaUsuarios();
+        const usuariosData = await obtenerUsuarios();
         setReclamos(reclamosData);
         setUsuarios(usuariosData);
       } catch (err) {

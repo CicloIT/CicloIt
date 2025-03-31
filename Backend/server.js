@@ -76,7 +76,7 @@ app.post("/registro", async (req, res) => {
 
 app.get("/usuarios", async (req, res) => {
   try {
-    const result = await db.client.execute("SELECT * FROM usuarios where rol <> 'cliente'");
+    const result = await db.client.execute("SELECT * FROM usuarios;");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
