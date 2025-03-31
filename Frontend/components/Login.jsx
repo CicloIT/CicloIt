@@ -2,36 +2,33 @@ import PropTypes from 'prop-types';
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { login } from "../services/api";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
-function Login({setRol}) {
+function Login({ setRol, onLogin }) {  // <-- Recibe onLogin como prop
   const [nombre, setNombre] = useState("");  
   const [contrasena, setContrasena] = useState("");
   const [mensajeError, setMensajeError] = useState("");
-  const [mensajeExito, setMensajeExito] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
     setMensajeError("");
-    setMensajeExito("");
     setIsLoading(true); 
 
     try {
-      const data = { nombre,contrasena };
+      const data = { nombre, contrasena };
       const response = await login(data);      
 
       const decodedToken = jwtDecode(response.token);
-      setRol(decodedToken.rol); // Actualizamos el rol en el componente padre
+      setRol(decodedToken.rol); 
+      onLogin(response.token); // <-- Llamamos a onLogin para actualizar el token en App.js
 
-      setMensajeExito("Login exitoso");
-      localStorage.setItem("user", JSON.stringify(response.token)); // Guardamos el token en el localStorage
-      navigate("/"); // Redirige a la página principal
+      navigate("/"); 
     } catch (error) {
       setMensajeError("Error al intentar iniciar sesión");
       console.error(error);
-    }finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -80,7 +77,7 @@ function Login({setRol}) {
              {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-              <span className="ml-2">Iniciando sesion</span>
+              <span className="ml-2">Iniciando sesión</span>
             </div>
           ) : (
             'Iniciar sesión'
@@ -91,14 +88,14 @@ function Login({setRol}) {
         {mensajeError && (
           <p className="mt-4 text-red-500 text-center">{mensajeError}</p>
         )}
-        {mensajeExito && <p>{mensajeExito}</p>}
       </div>
     </div>
   );
 }
 
 Login.propTypes = {
-  setRol: PropTypes.func.isRequired
+  setRol: PropTypes.func.isRequired,
+  onLogin: PropTypes.func.isRequired // <-- Asegurar que la prop es requerida
 };
 
 export default Login;

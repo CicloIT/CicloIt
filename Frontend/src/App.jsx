@@ -30,21 +30,32 @@ const Inicio = () => {
 function App() {
   const [rol, setRol] = useState(null);
   const [loading, setLoading] = useState(true); // Para evitar redirección antes de cargar el token
-
+  const [usuarioActual, setUsuarioActual] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("user"));
   useEffect(() => {
-    const token = localStorage.getItem("user");
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
         setRol(decodedToken.rol);
+        // Establece el usuario actual con la información del token
+        setUsuarioActual({
+          id: decodedToken.id,
+          nombre: decodedToken.nombre,
+        });
       } catch (error) {
         console.error(error,"Token inválido, cerrando sesión...");
         localStorage.removeItem("user");
         setRol(null);
+        setUsuarioActual(null);
       }
     }
-    setLoading(false); // Marca que la carga ha terminado
-  }, []);
+    setLoading(false);
+  }, [token]);
+
+  const handleLogin = (newToken) => {
+    localStorage.setItem("user", newToken);
+    setToken(newToken); // Dispara el useEffect y actualiza el usuario sin recargar la página
+  };
 
   // Mientras se verifica el token, mostrar un mensaje de carga
   if (loading) return <div className="text-center text-lg">Cargando...</div>;
@@ -70,17 +81,17 @@ function App() {
       <Navbar rol={rol} setRol={setRol}/>
       <Routes>
         {/* Ruta de inicio de sesión */}
-        <Route path="/login" element={<Login setRol={setRol} />} />
+        <Route path="/login" element={<Login setRol={setRol} onLogin={handleLogin} />} />
         {/* Rutas accesibles por todos los roles */}
         <Route path="/" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><Inicio /></RutaProtegida>} />
-        <Route path="/reclamos" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><Reclamos /></RutaProtegida>} />
+        <Route path="/reclamos" element={<RutaProtegida rolesPermitidos={["admin", "tecnico", "cliente"]}><Reclamos /></RutaProtegida>} />
         <Route path="/orden-trabajo" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><OrdenTrabajo /></RutaProtegida>} />
         {/* Rutas exclusivas para admin */}
         <Route path="/registro" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistroUsuarios /></RutaProtegida>} />
         <Route path="/registrar-cliente" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
         <Route path="/usuarios" element={<RutaProtegida rolesPermitidos={["admin"]}><ListaUsuarios /></RutaProtegida>} />
         <Route path="/usuarios/:id" element={<RutaProtegida rolesPermitidos={["admin"]}><PerfilUsuario /></RutaProtegida>} />        
-        <Route path="/registrar-reclamo" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioReclamos /></RutaProtegida>} />
+        <Route path="/registrar-reclamo" element={<RutaProtegida rolesPermitidos={["admin", "cliente"]}><FormularioReclamos usuarioActual={usuarioActual} rol={rol}/></RutaProtegida>} />
         <Route path="/registrar-orden" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioOrden /></RutaProtegida>} />
         <Route path="/registrar-clientes" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
         <Route path="/crear-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}> <CrearPresupuesto/></RutaProtegida>}/>

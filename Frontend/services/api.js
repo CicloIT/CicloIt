@@ -121,7 +121,6 @@ export const registrarReclamo = async (data) => {
       if (!response.ok) {
         throw new Error('Error al crear el reclamo');
       }
-  
       return await response.json();
     } catch (error) {
       console.error(error);
@@ -443,4 +442,22 @@ export const actualizarOrden = async (id, datos) => {
   }
   
   return await response.json();
+};
+
+export const obtenerReclamosPorCliente = async (usuario) => {
+  try {
+    const response = await fetch(`${API_URL}/reclamos/cliente/${usuario}`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener los reclamos del cliente');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };

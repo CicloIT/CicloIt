@@ -5,7 +5,7 @@ function RegistroUsuarios() {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [password, setPassword] = useState("");
-  const [rol, setRol] = useState("tecnico");
+  const [rol, setRol] = useState("cliente");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +28,7 @@ function RegistroUsuarios() {
       setNombre("");
       setApellido("");
       setPassword("");
-      setRol("tecnico");
+      setRol("cliente");
       setTimeout(() => {
         setMessage("");
       }, 2000);
@@ -89,6 +89,7 @@ function RegistroUsuarios() {
             >
               <option value="tecnico">Técnico</option>
               <option value="admin">Admin</option>
+              <option value="cliente">Cliente</option>
             </select>
           </div>
 
