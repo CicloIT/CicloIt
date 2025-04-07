@@ -252,7 +252,7 @@ function Reclamos() {
                         </select>
                       </div>
 
-                      <div>
+                      <div>                        
                         <label className="block text-sm font-medium">Asignado a:</label>
                         <select
                           name="asignado"
@@ -299,6 +299,7 @@ function Reclamos() {
                     </>
                   ) : (
                     <>
+                      <p>Numero: {reclamo.id}</p>
                       <p><strong>Cliente:</strong> {nombreCliente}</p>
                       <p><strong>Asignado a:</strong> {reclamo.usuario_nombre || "Sin asignar"}</p>
                       <p><strong>Importancia:</strong> {reclamo.importancia}</p>

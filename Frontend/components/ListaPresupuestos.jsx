@@ -18,13 +18,13 @@ function ListaPresupuestos() {
       try {
         setLoading(true);
         const datos = await obtenerPresupuestos();
-        
+        console.log('Presupuestos cargados:', datos);
         if (Array.isArray(datos) && datos.length > 0) {
           setPresupuestos(datos);
           setError(null);
         } else {
           setPresupuestos([]);
-        }
+        }       // Agrega esta línea para depuració   
       } catch (err) {
         console.error('Error al cargar presupuestos:', err);
         setError('No se pudieron cargar los presupuestos');
@@ -56,7 +56,7 @@ function ListaPresupuestos() {
       if (!usuarioSeleccionado) {
         alert('Por favor seleccione un usuario');
         return;
-      }      
+      }
       await generarOT(idPresupuesto, usuarioSeleccionado, importanciaSeleccionada);
       setShowModal(false); // Cerrar el modal después de generar la OT
     } catch (error) {
@@ -77,7 +77,7 @@ function ListaPresupuestos() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h2 className="text-2xl font-semibold text-center mb-6">Listado de Presupuestos</h2>
-      
+
       {presupuestos.length === 0 ? (
         <div className="text-center text-gray-500">{'No hay presupuestos registrados'}</div>
       ) : (
@@ -94,36 +94,36 @@ function ListaPresupuestos() {
             </thead>
             <tbody>
               {presupuestos.map((presupuesto) => (
-                <tr 
-                  key={presupuesto.id} 
+                <tr
+                  key={presupuesto.id}
                   className="border-b hover:bg-gray-50 transition-colors"
                 >
                   <td className="p-3">{presupuesto.id}</td>
                   <td className="p-3">{presupuesto.nombre_cliente}</td>
                   <td className="p-3">{presupuesto.descripcion}</td>
                   <td className="p-3 text-right">
-                    {presupuesto.dolares ? (
-                      `US$${presupuesto.dolares.toFixed(4)}`
-                    ):(
-                    `$${presupuesto.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    )}                  
-                  </td>                                   
+                    {presupuesto.dolares != null && presupuesto.dolares !== presupuesto.total ? (
+                      `US$${presupuesto.dolares.toFixed(2)}`
+                    ) : (
+                      `$${presupuesto.total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    )}
+                  </td>
                   <td className="p-3 text-center space-x-2 flex flex-wrap justify-center gap-2">
-  <button
-    onClick={() => handleVerDetalle(presupuesto.id)}
-    className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors text-sm md:text-base w-full sm:w-auto"
-  >
-    Ver Detalle
-  </button>
+                    <button
+                      onClick={() => handleVerDetalle(presupuesto.id)}
+                      className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors text-sm md:text-base w-full sm:w-auto"
+                    >
+                      Ver Detalle
+                    </button>
 
-  <button
-    onClick={() => setShowModal(true)} // Muestra el modal
-    className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors text-sm md:text-base w-full sm:w-auto"
-    disabled={loadingOT === presupuesto.id}
-  >
-    {loadingOT === presupuesto.id ? 'Generando...' : 'Generar OT'}
-  </button>
-</td>
+                    <button
+                      onClick={() => setShowModal(true)} // Muestra el modal
+                      className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors text-sm md:text-base w-full sm:w-auto"
+                      disabled={loadingOT === presupuesto.id}
+                    >
+                      {loadingOT === presupuesto.id ? 'Generando...' : 'Generar OT'}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -181,6 +181,7 @@ function OrdenTrabajo() {
               className="p-4 hover:bg-gray-50 transition-colors duration-150"
             >
               <div className="grid grid-cols-2 gap-4">
+                <p>Numero: {orden.id}</p>
                 <p className="text-sm">
                   <span className="font-semibold">Cliente:</span> {orden.empresa}
                 </p>
