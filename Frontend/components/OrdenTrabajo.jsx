@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { obtenerOrdenes, listaUsuarios, actualizarOrden } from "../services/api";
+import { obtenerOrdenes, actualizarOrden, eliminarOrdenTrabajo, obtenerUsuarios } from "../services/api";
 import { format } from "date-fns";
+import { Pencil, Trash2, Filter, UserCircle, AlertTriangle, ClipboardList, LoaderCircle, Save, XCircle, MessageSquareText } from "lucide-react";
 
 function OrdenTrabajo() {
   const [ordenes, setOrdenes] = useState(null);
@@ -20,7 +21,7 @@ function OrdenTrabajo() {
       try {
         const [ordenesData, usuariosData] = await Promise.all([
           obtenerOrdenes(),
-          listaUsuarios()
+          obtenerUsuarios()
         ]);
         setOrdenes(ordenesData);
         setUsuarios(usuariosData);
@@ -35,27 +36,39 @@ function OrdenTrabajo() {
   }, []);
 
   const handleEditar = (orden) => {
-    // Asegúrate de que usuario_id sea el ID y no el nombre
+    // Asegurarse de que usuario_id esté correctamente asignado desde el inicio
     setOrdenEditada({
       ...orden,
-      usuario_id: orden.id_usuario // Asegúrate de que este campo exista
+      usuario_id: orden.id_usuario || '' // Usar el valor existente o un valor predeterminado
     });
   };
 
+  const handleDelete = async (ordenId) => {
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta orden?");
+    if (!confirmacion) return;
+    try {
+      await eliminarOrdenTrabajo(ordenId);
+      setOrdenes(prev => prev.filter(o => o.orden_id !== ordenId));
+    } catch (error) {
+      console.error("Error al eliminar la orden:", error);
+      alert("Error al eliminar la orden");
+    }
+  }
   const handleGuardarEdicion = async () => {
     try {
-      // Asegúrate de enviar el campo correcto según tu API
-      await actualizarOrden(ordenEditada.orden_id, {
+      // Preparar los datos para actualizar, manteniendo el usuario_id original si no cambió
+      const datosActualizados = {
         importancia: ordenEditada.importancia,
         estado: ordenEditada.estado,
-        id_usuario: ordenEditada.usuario_id, // Cambiado a id_usuario para coincidir con el endpoint
-      });
+        id_usuario: ordenEditada.usuario_id
+      };
 
-      // Actualiza el estado local solo después de una actualización exitosa
-      setOrdenes((prev) => prev.map(o => 
+      await actualizarOrden(ordenEditada.orden_id, datosActualizados);
+
+      // Actualiza el estado local
+      setOrdenes((prev) => prev.map(o =>
         o.orden_id === ordenEditada.orden_id ? {
           ...ordenEditada,
-          // Actualiza el nombre del usuario si cambió
           nombre_usuario_asignado: usuarios.find(u => u.id === parseInt(ordenEditada.usuario_id))?.nombre || o.nombre_usuario_asignado
         } : o
       ));
@@ -103,56 +116,60 @@ function OrdenTrabajo() {
       </h2>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <input
             type="text"
             name="nombreCliente"
             placeholder="Filtrar por cliente..."
             value={filtros.nombreCliente}
             onChange={handleFiltroChange}
-            className="p-2 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+            className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           />
+          <UserCircle className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <select
             name="usuarioAsignado"
             value={filtros.usuarioAsignado}
             onChange={handleFiltroChange}
-            className="p-2 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+            className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           >
             <option value="">Todos los usuarios</option>
             {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.nombre}>
+              <option key={usuario.id} value={usuario.id}>
                 {usuario.nombre}
               </option>
             ))}
           </select>
+          <Filter className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">       
           <select
             name="importancia"
             value={filtros.importancia}
             onChange={handleFiltroChange}
-            className="p-2 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+             className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           >
-            <option value="">Todas las importancias</option>
+            <option className="pl-4" value="">Importancias</option>
             <option value="alta">Alta</option>
             <option value="media">Media</option>
             <option value="baja">Baja</option>
-          </select>
+          </select>         
+          <AlertTriangle className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">       
           <select
             name="estado"
             value={filtros.estado}
             onChange={handleFiltroChange}
-            className="p-2 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+             className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendientes</option>
+            <option  value="">Estados</option>
+            <option value="abierto">Abiertos</option>
             <option value="en proceso">En Procesos</option>
-            <option value="finalizado">Finalizados</option>
+            <option value="cerrado">Cerrados</option>
           </select>
+          <ClipboardList className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
       </div>
 
@@ -162,7 +179,7 @@ function OrdenTrabajo() {
             <li
               key={orden.orden_id}
               className="p-4 hover:bg-gray-50 transition-colors duration-150"
-            >            
+            >
               <div className="grid grid-cols-2 gap-4">
                 <p className="text-sm">
                   <span className="font-semibold">Cliente:</span> {orden.empresa}
@@ -171,7 +188,7 @@ function OrdenTrabajo() {
                   <span className="font-semibold">Asignado a:</span> {orden.nombre_usuario_asignado}
                 </p>
                 <p className="text-sm">
-                  <span className="font-semibold">Importancia:</span> 
+                  <span className="font-semibold">Importancia:</span>
                   <span className={`ml-1 px-2 py-1 rounded-full text-xs ${orden.importancia === 'alta' ? 'bg-red-100 text-red-800' : orden.importancia === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                     {orden.importancia}
                   </span>
@@ -187,13 +204,24 @@ function OrdenTrabajo() {
                 </p>
                 <p className="text-sm col-span-2">
                   <span className="font-semibold">Fecha de Creación:</span> {orden.creacion ? format(new Date(orden.creacion), "dd/MM/yyyy HH:mm") : "No disponible"}
-                </p>
-                <button
-                  onClick={() => handleEditar(orden)}
-                  className="mt-4 p-2 bg-blue-500 text-white rounded-md"
-                >
-                  Editar
-                </button>
+                </p>                
+              </div>
+              <div className="col-span-2 text-right flex gap-4 justify-end">
+              <button
+                          onClick={() => iniciarEdicion(reclamo)}
+                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                        >
+                          <Pencil size={16} />
+                          Editar
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(reclamo.id)}
+                          className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                        >
+                          <Trash2 size={16} />
+                          Eliminar
+                        </button>
               </div>
             </li>
           ))}
@@ -239,6 +267,7 @@ function OrdenTrabajo() {
                 onChange={handleChange}
                 className="p-2 border rounded shadow-sm w-full"
               >
+                <option value="">Seleccione un usuario</option>
                 {usuarios.map(usuario => (
                   <option key={usuario.id} value={usuario.id}>
                     {usuario.nombre}

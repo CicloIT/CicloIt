@@ -50,7 +50,7 @@ function FormularioReclamos({ usuarioActual, rol }) {
       return;
     }
 
-    if (!usuarioId || !titulo || !descripcion || !importancia || !estado) {
+    if (!titulo || !descripcion || !importancia || !estado) {
       setMessage("Todos los campos son obligatorios");
       setLoading(false);
       return;
@@ -58,7 +58,7 @@ function FormularioReclamos({ usuarioActual, rol }) {
 
     try {
       const data = {
-        usuario_id: Number(usuarioId),
+        usuario_id: rol === "cliente" ? null : Number(usuarioId),
         ...(ordenTrabajoId && ordenTrabajoId !== "otro"
           ? { ordenTrabajo_id: Number(ordenTrabajoId) }
           : { ordenTrabajo_id: null }), // Usar ordenTrabajoManual si es "otro"
@@ -68,6 +68,8 @@ function FormularioReclamos({ usuarioActual, rol }) {
         estado,
         ...(rol === "cliente" && { creadoPor }),
         cliente: rol === "cliente" ? usuarioActual?.nombre : ordenTrabajoManual,
+        cargo: rol === "cliente" ? creadoPor : usuarioActual?.nombre,
+        comentario: "",
       };
       const response = await registrarReclamo(data);
 
@@ -77,7 +79,7 @@ function FormularioReclamos({ usuarioActual, rol }) {
         setEstado("");
         setImportancia("");
         setTitulo("");
-        setUsuarioId(usuarioActual?.id || "");
+        if (rol !== "cliente") setUsuarioId("");
         setOrdenTrabajoId("");
         setOrdenTrabajoManual(""); // Resetear también este campo
 
@@ -106,21 +108,7 @@ function FormularioReclamos({ usuarioActual, rol }) {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Si el usuario es cliente, mostramos su nombre y el campo creadoPor */}
           {rol === "cliente" ? (
-            <>
-              <select
-                id="usuarioId"
-                value={usuarioId}
-                onChange={(e) => setUsuarioId(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg"
-                required
-              >
-                <option value="">Seleccionar Usuario</option>
-                {usuarios.map((usuario) => (
-                  <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre} {usuario.apellido}
-                  </option>
-                ))}
-              </select>
+            <>            
               <div>
                 <input
                   type="text"

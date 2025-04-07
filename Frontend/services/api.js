@@ -1,5 +1,5 @@
-const API_URL = 'https://ciclo-it.vercel.app';
-//sconst API_URL = 'http://localhost:3000';
+//const API_URL = 'https://ciclo-it.vercel.app';
+const API_URL = 'http://localhost:3000';
 export const login = async (data) => {
   try {
       const response = await fetch(`${API_URL}/login`, {
@@ -460,4 +460,50 @@ export const obtenerReclamosPorCliente = async (usuario) => {
     console.error(error);
     throw error;
   }
+};
+
+export const eliminarReclamo = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/reclamos/${id}/borrar`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    }); 
+    if (!response.ok) {
+      throw new Error('Error al eliminar el reclamo');
+    }
+  }catch (error) {
+    console.error(error);
+    throw error; 
+  }
+};
+
+export const eliminarOrdenTrabajo = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/ordenes/${id}/borrar`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });  
+    if (!response.ok) {
+      throw new Error('Error al eliminar la orden de trabajo');
+    }
+  }catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export const editarReclamo = async (id, datos) => {
+  const res = await fetch(`${API_URL}/api/reclamos/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(datos),
+  });
+  if (!res.ok) throw new Error("Error al editar el reclamo");
+  return await res.json();
 };

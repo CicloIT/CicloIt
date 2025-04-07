@@ -17,7 +17,7 @@ app.post("/login", async (req, res) => {
   try {
     const result = await db.client.execute({
       sql: "SELECT * FROM usuarios WHERE nombre = ? OR usuario = ? ",
-      args: [nombre,nombre],
+      args: [nombre, nombre],
     });
     const user = result.rows[0];
     if (!user) {
@@ -92,16 +92,18 @@ app.get("/reclamos/cliente/:nombre", async (req, res) => {
 
     const result = await db.client.execute(
       `SELECT r.id, r.titulo, r.descripcion AS reclamo_descripcion, 
-              r.importancia, r.estado, r.created_at AS creacion,
+              r.importancia,r.usuario_id ,r.comentario,r.estado, r.cargo, r.created_at AS creacion,
               u.nombre AS usuario_nombre, 
               c.empresa AS empresa, 
               ot.descripcion AS orden_descripcion,
               r.cliente AS cliente
         FROM reclamos r
-        JOIN usuarios u ON r.usuario_id = u.id
+        LEFT JOIN usuarios u ON r.usuario_id = u.id
         LEFT JOIN orden_trabajo ot ON r.ordenTrabajo_id = ot.id
         LEFT JOIN clientes c ON ot.id_cliente = c.id
-        WHERE LOWER(r.cliente) LIKE ? 
+        WHERE r.borrado = 0 
+            AND
+        LOWER(r.cliente) LIKE ? 
            OR (c.empresa IS NOT NULL AND LOWER(c.empresa) LIKE ?);`,
       [filtro, filtro] // Pasamos los valores correctamente
     );
@@ -121,6 +123,45 @@ app.get("/reclamos/cliente/:nombre", async (req, res) => {
 });
 
 
+app.delete("/reclamos/:id/borrar", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.client.execute({
+      sql: `UPDATE reclamos SET borrado = 1 WHERE id = ?`,
+      args: [id],
+    });
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ error: "Reclamo no encontrado" });
+    }
+
+    res.json({ message: "Reclamo borrado lógicamente" });
+  } catch (error) {
+    console.error("Error al borrar el reclamo:", error);
+    res.status(500).json({ error: "Error al borrar el reclamo" });
+  }
+});
+
+app.delete("/ordenes/:id/borrar", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.client.execute({
+      sql: `UPDATE orden_trabajo SET borrado = 1 WHERE id = ?`,
+      args: [id],
+    });
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ error: "Reclamo no encontrado" });
+    }
+
+    res.json({ message: "Reclamo borrado lógicamente" });
+  } catch (error) {
+    console.error("Error al borrar el reclamo:", error);
+    res.status(500).json({ error: "Error al borrar el reclamo" });
+  }
+});
 
 app.get("/clientes", async (req, res) => {
   try {
@@ -187,6 +228,7 @@ app.get("/ordenes", async (req, res) => {
       FROM orden_trabajo ot
       JOIN clientes c ON ot.id_cliente = c.id
       JOIN usuarios u ON ot.id_usuario = u.id
+      WHERE ot.borrado = 0
       ORDER BY ot.creacion DESC
     `);
     res.json(result.rows);
@@ -198,16 +240,15 @@ app.get("/ordenes", async (req, res) => {
 
 app.post("/reclamos", async (req, res) => {
   const usuario_id = Number(req.body.usuario_id);
-  const ordenTrabajo_id = req.body.ordenTrabajo_id; // El valor puede ser "otro" o un ID numérico
-  const cliente = req.body.cliente || ""; // Si no se proporciona un valor para cliente, usamos una cadena vacía
-  const { titulo, descripcion, importancia, estado } = req.body;
+  const ordenTrabajo_id = req.body.ordenTrabajo_id;
+  const cliente = req.body.cliente || "";
+  const { titulo, descripcion, importancia, estado, cargo,comentario } = req.body;
 
-  if (!usuario_id || !titulo || !descripcion || !importancia || !estado) {
+  if (!titulo || !descripcion || !importancia || !estado || !cargo) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }
 
   try {
-    // Verifica si la orden de trabajo existe si no es "otro"
     if (ordenTrabajo_id && ordenTrabajo_id !== "otro") {
       const ordenResult = await db.client.execute({
         sql: "SELECT * FROM orden_trabajo WHERE id = ?",
@@ -219,21 +260,25 @@ app.post("/reclamos", async (req, res) => {
       }
     }
 
-    // Preparamos la consulta SQL dependiendo si se usa una orden de trabajo o un valor manual
-    const sql = ordenTrabajo_id
-    ? `INSERT INTO reclamos (usuario_id, ordenTrabajo_id, titulo, descripcion, importancia, estado, cliente)
-         VALUES (?,?,?,?,?,?,?)`
-    : `INSERT INTO reclamos (usuario_id, titulo, descripcion, importancia, estado, cliente)
-         VALUES (?,?,?,?,?,?)`;
-  
-  const args = ordenTrabajo_id
-    ? [usuario_id, ordenTrabajo_id, titulo, descripcion, importancia, estado, cliente]
-    : [usuario_id, titulo, descripcion, importancia, estado, cliente];
-  
-  const result = await db.client.execute({
-    sql: sql,
-    args: args
-  });
+    let sql = `INSERT INTO reclamos (titulo, descripcion, importancia, estado, cliente, cargo, comentario`;
+    let args = [titulo, descripcion, importancia, estado, cliente, cargo,comentario];
+
+    if (usuario_id) {
+      sql += `, usuario_id`;
+      args.push(usuario_id);
+    }
+
+    if (ordenTrabajo_id && ordenTrabajo_id !== "otro") {
+      sql += `, ordenTrabajo_id`;
+      args.push(ordenTrabajo_id);
+    }
+
+    sql += `) VALUES (${args.map(() => '?').join(', ')})`;
+
+    const result = await db.client.execute({
+      sql: sql,
+      args: args
+    });
 
     res.status(201).json({
       id: result.lastInsertRowid.toString(),
@@ -244,7 +289,6 @@ app.post("/reclamos", async (req, res) => {
     res.status(500).json({ error: "Error al crear el reclamo" });
   }
 });
-
 
 app.get("/api/clientes", async (req, res) => {
   try {
@@ -274,6 +318,7 @@ app.get("/api/ordenesTrabajo", async (req, res) => {
       SELECT ot.id, ot.descripcion, c.empresa AS empresa
       FROM orden_trabajo ot
       JOIN clientes c ON ot.id_cliente = c.id
+      WHERE ot.borrado = 0
     `);
     res.json(result.rows);
   } catch (error) {
@@ -286,15 +331,16 @@ app.get("/api/reclamos", async (req, res) => {
   try {
     const result = await db.client.execute(`
       SELECT r.id, r.titulo, r.descripcion AS reclamo_descripcion, 
-       r.importancia, r.estado, r.created_at AS creacion,
+       r.importancia,r.usuario_id, r.estado,r.cargo, r.comentario,r.created_at AS creacion,
        u.nombre AS usuario_nombre, 
        c.empresa AS empresa, 
        ot.descripcion AS orden_descripcion,
        r.cliente  AS cliente
 FROM reclamos r
-JOIN usuarios u ON r.usuario_id = u.id
+LEFT JOIN usuarios u ON r.usuario_id = u.id
 LEFT JOIN orden_trabajo ot ON r.ordenTrabajo_id = ot.id
 LEFT JOIN clientes c ON ot.id_cliente = c.id
+WHERE r.borrado = 0
     `);
 
     // Formatear las filas para manejar el campo `ordenTrabajo_id` correctamente
@@ -317,6 +363,32 @@ LEFT JOIN clientes c ON ot.id_cliente = c.id
     res.status(500).json({ error: "Error al obtener los reclamos" });
   }
 });
+
+
+app.put("/api/reclamos/:id", async (req, res) => {
+  const reclamoId = req.params.id;   
+  const { importancia, estado, reclamo_descripcion: descripcion, asignado, comentario} = req.body;
+  try {
+    await db.client.execute({
+      sql: `UPDATE reclamos
+            SET importancia = ?, estado = ?, descripcion = ?, usuario_id = ?,comentario = ?  
+            WHERE id = ?`,
+      args: [importancia, estado, descripcion, asignado, reclamoId,comentario],
+    });
+
+    res.json({
+      reclamoId,
+      importancia,
+      estado,
+      descripcion,
+      asignado,
+      comentario
+    });
+  }catch (error) {
+    console.error("Error al actualizar el reclamo:", error);
+    res.status(500).json({ error: "Error al actualizar el reclamo" });
+  }
+})
 
 app.post("/clientes", async (req, res) => {
   const { nombre, empresa, email, telefono, localidad, provincia, direccion } =
@@ -468,6 +540,7 @@ app.post("/presupuestos", verificarToken, async (req, res) => {
       .json({ error: "Error al crear el presupuesto", details: error.message });
   }
 });
+
 
 // Obtener todos los presupuestos
 app.get("/presupuestos", verificarToken, async (req, res) => {
@@ -625,9 +698,8 @@ app.post("/agregar_producto", async (req, res) => {
       .status(201)
       .json({
         id: lastInsertId,
-        message: `${
-          categoria.charAt(0).toUpperCase() + categoria.slice(1)
-        } agregado exitosamente`,
+        message: `${categoria.charAt(0).toUpperCase() + categoria.slice(1)
+          } agregado exitosamente`,
       });
   } catch (error) {
     console.error("Error al agregar producto o accesorio:", error);
@@ -714,7 +786,7 @@ app.put("/actualizarOrden/:id", async (req, res) => {
 
   if (!importancia || !estado || !id_usuario) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
-  }
+  }  
   try {
     const result = await db.client.execute({
       sql: `
