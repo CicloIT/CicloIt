@@ -143,28 +143,28 @@ function OrdenTrabajo() {
           </select>
           <Filter className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
-        <div className="flex flex-col relative">       
+        <div className="flex flex-col relative">
           <select
             name="importancia"
             value={filtros.importancia}
             onChange={handleFiltroChange}
-             className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+            className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           >
             <option className="pl-4" value="">Importancias</option>
             <option value="alta">Alta</option>
             <option value="media">Media</option>
             <option value="baja">Baja</option>
-          </select>         
+          </select>
           <AlertTriangle className="absolute left-2 top-2.5 text-gray-400 w-5 h-5" />
         </div>
-        <div className="flex flex-col relative">       
+        <div className="flex flex-col relative">
           <select
             name="estado"
             value={filtros.estado}
             onChange={handleFiltroChange}
-             className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+            className="p-2 pl-10 border rounded shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
           >
-            <option  value="">Estados</option>
+            <option value="">Estados</option>
             <option value="abierto">Abiertos</option>
             <option value="en proceso">En Procesos</option>
             <option value="cerrado">Cerrados</option>
@@ -180,119 +180,116 @@ function OrdenTrabajo() {
               key={orden.orden_id}
               className="p-4 hover:bg-gray-50 transition-colors duration-150"
             >
-              <div className="grid grid-cols-2 gap-4">
-                <p>Numero: {orden.id}</p>
-                <p className="text-sm">
-                  <span className="font-semibold">Cliente:</span> {orden.empresa}
-                </p>
-                <p className="text-sm">
-                  <span className="font-semibold">Asignado a:</span> {orden.nombre_usuario_asignado}
-                </p>
-                <p className="text-sm">
-                  <span className="font-semibold">Importancia:</span>
-                  <span className={`ml-1 px-2 py-1 rounded-full text-xs ${orden.importancia === 'alta' ? 'bg-red-100 text-red-800' : orden.importancia === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                    {orden.importancia}
-                  </span>
-                </p>
-                <p className="text-sm">
-                  <span className="font-semibold">Estado:</span>
-                  <span className={`ml-1 px-2 py-1 rounded-full text-xs ${orden.estado === 'pendiente' ? 'bg-gray-100 text-gray-800' : orden.estado === 'en proceso' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                    {orden.estado}
-                  </span>
-                </p>
-                <p className="text-sm col-span-2">
-                  <span className="font-semibold">Descripción:</span> {orden.descripcion}
-                </p>
-                <p className="text-sm col-span-2">
-                  <span className="font-semibold">Fecha de Creación:</span> {orden.creacion ? format(new Date(orden.creacion), "dd/MM/yyyy HH:mm") : "No disponible"}
-                </p>                
-              </div>
-              <div className="col-span-2 text-right flex gap-4 justify-end">
-              <button
-                          onClick={() => iniciarEdicion(reclamo)}
-                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-                        >
-                          <Pencil size={16} />
-                          Editar
-                        </button>
-
-                        <button
-                          onClick={() => handleDelete(reclamo.id)}
-                          className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
-                        >
-                          <Trash2 size={16} />
-                          Eliminar
-                        </button>
-              </div>
+              {ordenEditada?.orden_id === orden.orden_id ? (
+                // MODO EDICIÓN
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="text-sm block">Importancia</label>
+                    <select
+                      name="importancia"
+                      value={ordenEditada.importancia}
+                      onChange={handleChange}
+                      className="p-2 border rounded shadow-sm w-full"
+                    >
+                      <option value="alta">Alta</option>
+                      <option value="media">Media</option>
+                      <option value="baja">Baja</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-sm block">Estado</label>
+                    <select
+                      name="estado"
+                      value={ordenEditada.estado}
+                      onChange={handleChange}
+                      className="p-2 border rounded shadow-sm w-full"
+                    >
+                      <option value="pendiente">Pendiente</option>
+                      <option value="en proceso">En Proceso</option>
+                      <option value="finalizado">Finalizado</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-sm block">Usuario asignado</label>
+                    <select
+                      name="usuario_id"
+                      value={ordenEditada.usuario_id}
+                      onChange={handleChange}
+                      className="p-2 border rounded shadow-sm w-full"
+                    >
+                      <option value="">Seleccione un usuario</option>
+                      {usuarios.map(usuario => (
+                        <option key={usuario.id} value={usuario.id}>
+                          {usuario.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-span-2 flex justify-end gap-2 mt-2">
+                    <button
+                      onClick={handleGuardarEdicion}
+                      className="bg-green-500 text-white px-3 py-1 rounded flex items-center gap-1"
+                    >
+                      <Save size={16} /> Guardar
+                    </button>
+                    <button
+                      onClick={() => setOrdenEditada(null)}
+                      className="bg-gray-500 text-white px-3 py-1 rounded flex items-center gap-1"
+                    >
+                      <XCircle size={16} /> Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // MODO VISUALIZACIÓN
+                <div className="grid grid-cols-2 gap-4">
+                  <p>Numero: {orden.orden_id}</p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Cliente:</span> {orden.empresa}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Asignado a:</span> {orden.nombre_usuario_asignado}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Importancia:</span>
+                    <span className={`ml-1 px-2 py-1 rounded-full text-xs ${orden.importancia === 'alta' ? 'bg-red-100 text-red-800' : orden.importancia === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                      {orden.importancia}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Estado:</span>
+                    <span className={`ml-1 px-2 py-1 rounded-full text-xs ${orden.estado === 'pendiente' ? 'bg-gray-100 text-gray-800' : orden.estado === 'en proceso' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                      {orden.estado}
+                    </span>
+                  </p>
+                  <p className="text-sm col-span-2">
+                    <span className="font-semibold">Descripción:</span> {orden.descripcion}
+                  </p>
+                  <p className="text-sm col-span-2">
+                    <span className="font-semibold">Fecha de Creación:</span> {orden.creacion ? format(new Date(orden.creacion), "dd/MM/yyyy HH:mm") : "No disponible"}
+                  </p>
+                  <div className="col-span-2 text-right flex gap-4 justify-end mt-2">
+                    <button
+                      onClick={() => handleEditar(orden)}
+                      className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                    >
+                      <Pencil size={16} />
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(orden.orden_id)}
+                      className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Formulario de edición */}
-      {ordenEditada && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-md w-96">
-            <h3 className="text-lg font-semibold mb-4">Editar Orden</h3>
-            <div className="mb-4">
-              <label className="block text-sm">Importancia</label>
-              <select
-                name="importancia"
-                value={ordenEditada.importancia}
-                onChange={handleChange}
-                className="p-2 border rounded shadow-sm w-full"
-              >
-                <option value="alta">Alta</option>
-                <option value="media">Media</option>
-                <option value="baja">Baja</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm">Estado</label>
-              <select
-                name="estado"
-                value={ordenEditada.estado}
-                onChange={handleChange}
-                className="p-2 border rounded shadow-sm w-full"
-              >
-                <option value="pendiente">Pendiente</option>
-                <option value="en proceso">En Proceso</option>
-                <option value="finalizado">Finalizado</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm">Usuario Asignado</label>
-              <select
-                name="usuario_id"
-                value={ordenEditada.usuario_id}
-                onChange={handleChange}
-                className="p-2 border rounded shadow-sm w-full"
-              >
-                <option value="">Seleccione un usuario</option>
-                {usuarios.map(usuario => (
-                  <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={handleGuardarEdicion}
-                className="p-2 bg-green-500 text-white rounded-md mr-2"
-              >
-                Guardar
-              </button>
-              <button
-                onClick={() => setOrdenEditada(null)}
-                className="p-2 bg-gray-500 text-white rounded-md"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>     
     </div>
   );
 }

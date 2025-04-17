@@ -367,20 +367,20 @@ WHERE r.borrado = 0
 
 app.put("/api/reclamos/:id", async (req, res) => {
   const reclamoId = req.params.id;   
-  const { importancia, estado, reclamo_descripcion: descripcion, asignado, comentario} = req.body;
+  const { importancia, estado, reclamo_descripcion, asignado, comentario } = req.body;
   try {
     await db.client.execute({
       sql: `UPDATE reclamos
             SET importancia = ?, estado = ?, descripcion = ?, usuario_id = ?,comentario = ?  
             WHERE id = ?`,
-      args: [importancia, estado, descripcion, asignado, reclamoId,comentario],
+      args: [importancia, estado, reclamo_descripcion, asignado,comentario,reclamoId],
     });
 
     res.json({
       reclamoId,
       importancia,
       estado,
-      descripcion,
+      reclamo_descripcion,
       asignado,
       comentario
     });
