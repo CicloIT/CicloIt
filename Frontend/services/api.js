@@ -1,5 +1,5 @@
-const API_URL = 'https://ciclo-it.vercel.app';
-//const API_URL = 'http://localhost:3000';
+//const API_URL = 'https://ciclo-it.vercel.app';
+const API_URL = 'http://localhost:3000';
 export const login = async (data) => {
   try {
       const response = await fetch(`${API_URL}/login`, {
@@ -505,5 +505,105 @@ export const editarReclamo = async (id, datos) => {
     body: JSON.stringify(datos),
   });
   if (!res.ok) throw new Error("Error al editar el reclamo");
+  return await res.json();
+};
+
+
+export async function listarMateriales() {
+  const res = await fetch(`${API_URL}/materiales`);
+  if (!res.ok) throw new Error("Error obteniendo materiales");
+  return res.json();
+}
+
+export const crearMaterial = async (data) => {
+  const res = await fetch(`${API_URL}/materiales`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al crear material');
+  return await res.json();
+};
+
+export const ObtenerMaterialById = async (id) => {
+  const res = await fetch(`${API_URL}/materiales/${id}`);
+  if (!res.ok) throw new Error('Material no encontrado');
+  return await res.json();
+};
+
+
+
+export const actualizarMaterial = async (id, data) => {
+  const res = await fetch(`${API_URL}/materiales/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al actualizar material');
+  return await res.json();
+};
+
+export const eliminarMaterial = async (id) => {
+  const res = await fetch(`${API_URL}/materiales/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Error al eliminar material');
+  return await res.json();
+};
+
+// =================== MOVIMIENTOS ===================
+
+export const registrarMovimiento = async (data) => {
+  const res = await fetch(`${API_URL}/movimientos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al registrar movimiento');
+  return await res.json();
+};
+
+export const ObtenerMovimientos = async (query = {}) => {
+  const url = new URL(`${API_URL}/movimientos`);
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') url.searchParams.append(key, value);
+  });
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Error al obtener movimientos');
+  return await res.json();
+};
+
+// =================== RESPONSABLES ===================
+
+export const ObtenerResponsables = async () => {
+  const res = await fetch(`${API_URL}/responsable`);
+  if (!res.ok) throw new Error('Error al obtener responsables');
+  return await res.json();
+};
+
+export const crearResponsable = async (data) => {
+  const res = await fetch(`${API_URL}/responsable`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al crear responsable');
+  return await res.json();
+};
+
+// =================== ALERTAS ===================
+
+export const ObtenerAlertasStock = async () => {
+  const res = await fetch(`${API_URL}/alertas`);
+  if (!res.ok) throw new Error('Error al obtener alertas');
+  return await res.json();
+};
+
+// =================== DASHBOARD ===================
+
+export const ObtenerDashboard = async () => {
+  const res = await fetch(`${API_URL}/dashboard`);
+  if (!res.ok) throw new Error('Error al obtener datos del dashboard');
   return await res.json();
 };

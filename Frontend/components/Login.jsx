@@ -24,7 +24,7 @@ function Login({ setRol, onLogin }) {  // <-- Recibe onLogin como prop
       setRol(decodedToken.rol); 
       onLogin(response.token); // <-- Llamamos a onLogin para actualizar el token en App.js
 
-      navigate("/"); 
+      navigate("/seleccionar-modulo"); 
     } catch (error) {
       setMensajeError("Error al intentar iniciar sesión");
       console.error(error);

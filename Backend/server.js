@@ -3,7 +3,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import db from "./db.js";
+import { client} from "./db.js";
+import materialesRoutes from './routes/materiales.js';
+import movimientosRoutes from './routes/movimientos.js';
+import responsablesRoutes from './routes/responsables.js';
+
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const app = express();
@@ -15,7 +19,7 @@ app.use(cors());
 app.post("/login", async (req, res) => {
   const { nombre, contrasena } = req.body;
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: "SELECT * FROM usuarios WHERE nombre = ? OR usuario = ? ",
       args: [nombre, nombre],
     });
@@ -63,7 +67,7 @@ app.post("/registro", async (req, res) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: "INSERT INTO usuarios (nombre, apellido, contrasena, rol) VALUES (?, ?, ?, ?)",
       args: [nombre, apellido, hashedPassword, rol],
     });
@@ -76,7 +80,7 @@ app.post("/registro", async (req, res) => {
 
 app.get("/usuarios", async (req, res) => {
   try {
-    const result = await db.client.execute("SELECT * FROM usuarios;");
+    const result = await client.execute("SELECT * FROM usuarios;");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
@@ -90,7 +94,7 @@ app.get("/reclamos/cliente/:nombre", async (req, res) => {
     // Convertimos el nombre a minúsculas y agregamos los comodines '%' antes de pasarlo
     const filtro = `%${nombre.toLowerCase()}%`;
 
-    const result = await db.client.execute(
+    const result = await client.execute(
       `SELECT r.id, r.titulo, r.descripcion AS reclamo_descripcion, 
               r.importancia,r.usuario_id ,r.comentario,r.estado, r.cargo, r.created_at AS creacion,
               u.nombre AS usuario_nombre, 
@@ -127,7 +131,7 @@ app.delete("/reclamos/:id/borrar", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: `UPDATE reclamos SET borrado = 1 WHERE id = ?`,
       args: [id],
     });
@@ -147,7 +151,7 @@ app.delete("/ordenes/:id/borrar", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: `UPDATE orden_trabajo SET borrado = 1 WHERE id = ?`,
       args: [id],
     });
@@ -165,7 +169,7 @@ app.delete("/ordenes/:id/borrar", async (req, res) => {
 
 app.get("/clientes", async (req, res) => {
   try {
-    const result = await db.client.execute("SELECT * FROM clientes");
+    const result = await client.execute("SELECT * FROM clientes");
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
@@ -176,7 +180,7 @@ app.get("/clientes", async (req, res) => {
 app.get("/usuarios/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: "SELECT * FROM usuarios WHERE id = ?",
       args: [id],
     });
@@ -198,7 +202,7 @@ app.post("/ordenes", async (req, res) => {
   }
 
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: "INSERT INTO orden_trabajo (id_cliente, id_usuario, importancia, descripcion, estado) VALUES (?, ?, ?, ?, ?)",
       args: [id_cliente, id_usuario, importancia, descripcion, estado],
     });
@@ -215,7 +219,7 @@ app.post("/ordenes", async (req, res) => {
 
 app.get("/ordenes", async (req, res) => {
   try {
-    const result = await db.client.execute(`
+    const result = await client.execute(`
       SELECT 
         ot.id AS orden_id,
         c.empresa AS empresa,
@@ -250,7 +254,7 @@ app.post("/reclamos", async (req, res) => {
 
   try {
     if (ordenTrabajo_id && ordenTrabajo_id !== "otro") {
-      const ordenResult = await db.client.execute({
+      const ordenResult = await client.execute({
         sql: "SELECT * FROM orden_trabajo WHERE id = ?",
         args: [ordenTrabajo_id]
       });
@@ -275,7 +279,7 @@ app.post("/reclamos", async (req, res) => {
 
     sql += `) VALUES (${args.map(() => '?').join(', ')})`;
 
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: sql,
       args: args
     });
@@ -292,7 +296,7 @@ app.post("/reclamos", async (req, res) => {
 
 app.get("/api/clientes", async (req, res) => {
   try {
-    const result = await db.client.execute("SELECT * FROM clientes");
+    const result = await client.execute("SELECT * FROM clientes");
     res.json(result.rows);
   } catch (error) {
     console.error(error);
@@ -302,7 +306,7 @@ app.get("/api/clientes", async (req, res) => {
 
 app.get("/api/usuarios", async (req, res) => {
   try {
-    const result = await db.client.execute(
+    const result = await client.execute(
       "SELECT * FROM usuarios where rol <> 'cliente'"
     );
     res.json(result.rows);
@@ -314,7 +318,7 @@ app.get("/api/usuarios", async (req, res) => {
 
 app.get("/api/ordenesTrabajo", async (req, res) => {
   try {
-    const result = await db.client.execute(`
+    const result = await client.execute(`
       SELECT ot.id, ot.descripcion, c.empresa AS empresa
       FROM orden_trabajo ot
       JOIN clientes c ON ot.id_cliente = c.id
@@ -329,7 +333,7 @@ app.get("/api/ordenesTrabajo", async (req, res) => {
 
 app.get("/api/reclamos", async (req, res) => {
   try {
-    const result = await db.client.execute(`
+    const result = await client.execute(`
       SELECT r.id, r.titulo, r.descripcion AS reclamo_descripcion, 
        r.importancia,r.usuario_id, r.estado,r.cargo, r.comentario,r.created_at AS creacion,
        u.nombre AS usuario_nombre, 
@@ -369,7 +373,7 @@ app.put("/api/reclamos/:id", async (req, res) => {
   const reclamoId = req.params.id;   
   const { importancia, estado, reclamo_descripcion, asignado, comentario } = req.body;
   try {
-    await db.client.execute({
+    await client.execute({
       sql: `UPDATE reclamos
             SET importancia = ?, estado = ?, descripcion = ?, usuario_id = ?,comentario = ?  
             WHERE id = ?`,
@@ -401,7 +405,7 @@ app.post("/clientes", async (req, res) => {
   }
 
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: `INSERT INTO clientes (nombre, empresa, email, telefono, localidad, provincia, direccion) 
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
       args: [nombre, empresa, email, telefono, localidad, provincia, direccion],
@@ -581,7 +585,7 @@ app.get("/presupuestos/:id", async (req, res) => {
     const nombreCliente = presupuesto.nombre_cliente; // Obtener el nombre del cliente
 
     // Obtener el CUIT y tipo_iva del cliente desde la otra base de datos
-    const resultCliente = await db.client.execute({
+    const resultCliente = await client.execute({
       sql: `SELECT cuit, tipo_iva FROM clientes WHERE empresa = ?`,
       args: [nombreCliente],
     });
@@ -638,7 +642,7 @@ app.put("/actualizar-contrasena", async (req, res) => {
     // Hash de la nueva contraseña
     const hashedPassword = await bcrypt.hash(nuevaContra, 10);
     // Ejecutar la consulta para actualizar la contraseña
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: "UPDATE usuarios SET contrasena = ? WHERE id = ?",
       args: [hashedPassword, id],
     });
@@ -746,7 +750,7 @@ app.post("/agregar_ot", async (req, res) => {
       presupuestoResult.rows[0];
 
     // 2️⃣ Obtener el id_cliente a partir del nombre_cliente en la base de datos de clientes
-    const clienteResult = await db.client.execute({
+    const clienteResult = await client.execute({
       sql: "SELECT id FROM clientes WHERE empresa = ?", // Cambio de nombre a empresa en vez de nombre_cliente
       args: [nombre_cliente],
     });
@@ -763,7 +767,7 @@ app.post("/agregar_ot", async (req, res) => {
       .join(", ");
 
     // 4️⃣ Insertar los datos en la tabla OT en la base de datos de clientes
-    const ot = await db.client.execute({
+    const ot = await client.execute({
       sql: `INSERT INTO orden_trabajo (id_cliente, importancia, descripcion, estado, creacion, modificacion, id_presupuesto, id_usuario)  
             VALUES (?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)`,
       args: [id_cliente, importancia, descripcion, id_presupuesto, id_usuario], // Usamos los valores de importancia y id_usuario recibidos
@@ -788,7 +792,7 @@ app.put("/actualizarOrden/:id", async (req, res) => {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
   }  
   try {
-    const result = await db.client.execute({
+    const result = await client.execute({
       sql: `
         UPDATE orden_trabajo 
         SET importancia = ?, estado = ?, id_usuario = ?
@@ -807,6 +811,10 @@ app.put("/actualizarOrden/:id", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+
+app.use('/api/materiales', materialesRoutes);
+app.use('/api/movimientos', movimientosRoutes);
+app.use('/api/responsables', responsablesRoutes);
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);

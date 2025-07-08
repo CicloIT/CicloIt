@@ -18,6 +18,11 @@ import ListaPresupuestos from "../components/ListaPresupuestos";
 import DetallePresupuesto from "../components/DetallesPresupuesto";
 import AgregarProducto from "../components/AgregarProducto";
 import AgregarServicio from "../components/AgregarServicio";
+import MaterialesApp from "../components/MaterialesApp";
+import MovimientosApp from "../components/MovimientoApp";
+import ResponsablesApp from "../components/Responsables";
+import SeleccionarModulo from "../components/SeleccionarModulo";
+import StockLayout from "../components/StockLayout";
 
 const Inicio = () => {
   return (
@@ -43,7 +48,7 @@ function App() {
           nombre: decodedToken.nombre,
         });
       } catch (error) {
-        console.error(error,"Token inválido, cerrando sesión...");
+        console.error(error, "Token inválido, cerrando sesión...");
         localStorage.removeItem("user");
         setRol(null);
         setUsuarioActual(null);
@@ -78,27 +83,44 @@ function App() {
 
   return (
     <Router>
-      <Navbar rol={rol} setRol={setRol}/>
       <Routes>
-        {/* Ruta de inicio de sesión */}
+        {/* Login */}
         <Route path="/login" element={<Login setRol={setRol} onLogin={handleLogin} />} />
-        {/* Rutas accesibles por todos los roles */}
-        <Route path="/" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><Inicio /></RutaProtegida>} />
-        <Route path="/reclamos" element={<RutaProtegida rolesPermitidos={["admin", "tecnico", "cliente"]}><Reclamos /></RutaProtegida>} />
-        <Route path="/orden-trabajo" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><OrdenTrabajo /></RutaProtegida>} />
-        {/* Rutas exclusivas para admin */}
-        <Route path="/registro" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistroUsuarios /></RutaProtegida>} />
-        <Route path="/registrar-cliente" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
-        <Route path="/usuarios" element={<RutaProtegida rolesPermitidos={["admin"]}><ListaUsuarios /></RutaProtegida>} />
-        <Route path="/usuarios/:id" element={<RutaProtegida rolesPermitidos={["admin"]}><PerfilUsuario /></RutaProtegida>} />        
-        <Route path="/registrar-reclamo" element={<RutaProtegida rolesPermitidos={["admin", "cliente"]}><FormularioReclamos usuarioActual={usuarioActual} rol={rol}/></RutaProtegida>} />
-        <Route path="/registrar-orden" element={<RutaProtegida rolesPermitidos={["admin"]}><FormularioOrden /></RutaProtegida>} />
-        <Route path="/registrar-clientes" element={<RutaProtegida rolesPermitidos={["admin"]}><RegistrarCliente /></RutaProtegida>} />
-        <Route path="/crear-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}> <CrearPresupuesto/></RutaProtegida>}/>
-        <Route path="/ver-presupuesto" element={<RutaProtegida rolesPermitidos={["admin"]}><ListaPresupuestos /> </RutaProtegida>} />
-        <Route path="/ver-presupuesto-detalles/:id" element={<RutaProtegida rolesPermitidos={["admin"]}><DetallePresupuesto /></RutaProtegida>} />
-        <Route path="/agregar-producto" element={<RutaProtegida rolesPermitidos={["admin"]}><AgregarProducto /></RutaProtegida>} />
-        <Route path="/agregar-servicio" element={<RutaProtegida rolesPermitidos={["admin"]}><AgregarServicio /></RutaProtegida>} />
+
+        {/* Selección inicial luego del login */}
+        <Route path="/seleccionar-modulo" element={<RutaProtegida rolesPermitidos={["admin", "tecnico"]}><SeleccionarModulo /></RutaProtegida>} />
+
+        {/* Módulo Stock */}
+        <Route path="/stock/*" element={<RutaProtegida rolesPermitidos={["admin"]}><StockLayout rol={rol} /></RutaProtegida>} />
+
+        {/* Resto de rutas (Main Layout) */}
+        <Route
+          path="/*"
+          element={
+            <RutaProtegida rolesPermitidos={["admin", "tecnico", "cliente"]}>
+              <>
+                <Navbar rol={rol} setRol={setRol} />
+                <Routes>
+                  <Route path="/" element={<Inicio />} />
+                  <Route path="/reclamos" element={<Reclamos />} />
+                  <Route path="/orden-trabajo" element={<OrdenTrabajo />} />
+                  <Route path="/registro" element={<RegistroUsuarios />} />
+                  <Route path="/registrar-cliente" element={<RegistrarCliente />} />
+                  <Route path="/usuarios" element={<ListaUsuarios />} />
+                  <Route path="/usuarios/:id" element={<PerfilUsuario />} />
+                  <Route path="/registrar-reclamo" element={<FormularioReclamos usuarioActual={usuarioActual} rol={rol} />} />
+                  <Route path="/registrar-orden" element={<FormularioOrden />} />
+                  <Route path="/crear-presupuesto" element={<CrearPresupuesto />} />
+                  <Route path="/ver-presupuesto" element={<ListaPresupuestos />} />
+                  <Route path="/ver-presupuesto-detalles/:id" element={<DetallePresupuesto />} />
+                  <Route path="/agregar-producto" element={<AgregarProducto />} />
+                  <Route path="/agregar-servicio" element={<AgregarServicio />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </>
+            </RutaProtegida>
+          }
+        />
       </Routes>
     </Router>
   );
