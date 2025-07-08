@@ -7,7 +7,6 @@ const MaterialesApp = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
