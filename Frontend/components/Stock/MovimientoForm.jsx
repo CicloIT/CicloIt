@@ -60,6 +60,18 @@ export default function MovimientoForm({
           ))}
         </select>
 
+        {/* Responsable que recibe */}
+        <select
+          value={formData.responsable_id_recibe}
+          onChange={e => setFormData({ ...formData, responsable_id_recibe: e.target.value })}
+          className="border p-2 rounded"
+        >
+          <option value="">Sin responsable que recibe</option>
+          {responsables.map(resp => (
+            <option key={resp.id} value={resp.id}>{resp.nombre}</option>
+          ))}
+        </select>
+
         <input
           type="text"
           placeholder="Motivo (opcional)"

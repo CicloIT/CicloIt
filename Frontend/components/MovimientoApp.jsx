@@ -19,6 +19,7 @@ export default function MovimientosApp() {
     material_id: '',
     cantidad: '',
     responsable_id: '',
+    responsable_id_recibe: '',
     motivo: ''
   });
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,7 @@ export default function MovimientosApp() {
         material_id: '',
         cantidad: '',
         responsable_id: '',
+        responsable_id_recibe: '',
         motivo: ''
       });
       loadData();
