@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Search, X } from 'lucide-react';
+import {
+  getResponsables,
+  crearResponsable,
+  actualizarResponsable,
+  eliminarResponsable
+} from '../services/api';
 
 export default function ResponsablesApp() {
   const [responsables, setResponsables] = useState([]);
@@ -8,34 +14,38 @@ export default function ResponsablesApp() {
   const [selected, setSelected] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', departamento: '', email: '' });
 
-  const API = 'http://localhost:3000/api/responsables';
-
   const loadResponsables = async () => {
-    const res = await fetch(API);
-    const data = await res.json();
-    setResponsables(data);
+    try {
+      const data = await getResponsables();
+      setResponsables(data);
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
   const handleSubmit = async () => {
-    const method = selected ? 'PUT' : 'POST';
-    const url = selected ? `${API}/${selected.id}` : API;
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
-
-    if (res.ok) {
+    try {
+      if (selected) {
+        await actualizarResponsable(selected.id, formData);
+      } else {
+        await crearResponsable(formData);
+      }
       await loadResponsables();
       setShowModal(false);
       resetForm();
+    } catch (e) {
+      console.error(e.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (confirm('¿Eliminar responsable?')) {
-      await fetch(`${API}/${id}`, { method: 'DELETE' });
-      await loadResponsables();
+      try {
+        await eliminarResponsable(id);
+        await loadResponsables();
+      } catch (e) {
+        console.error(e.message);
+      }
     }
   };
 
@@ -127,7 +137,6 @@ export default function ResponsablesApp() {
         </table>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">

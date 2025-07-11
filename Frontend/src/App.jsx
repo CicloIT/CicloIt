@@ -18,9 +18,6 @@ import ListaPresupuestos from "../components/ListaPresupuestos";
 import DetallePresupuesto from "../components/DetallesPresupuesto";
 import AgregarProducto from "../components/AgregarProducto";
 import AgregarServicio from "../components/AgregarServicio";
-import MaterialesApp from "../components/MaterialesApp";
-import MovimientosApp from "../components/MovimientoApp";
-import ResponsablesApp from "../components/Responsables";
 import SeleccionarModulo from "../components/SeleccionarModulo";
 import StockLayout from "../components/StockLayout";
 

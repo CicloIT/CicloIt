@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, AlertTriangle, Package, Eye, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, Package } from 'lucide-react';
+import {
+  getMateriales,
+  getAlertasMateriales,
+  crearMaterial,
+  actualizarMaterial,
+  eliminarMaterial
+} from '../services/api';
+import MaterialFormModal from './Stock/MaterialFormModal';
+import AlertasStock from './Stock/AlertaStock';
 
-const MaterialesApp = () => {
+
+export default function MaterialesApp() {
   const [materiales, setMateriales] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,104 +26,77 @@ const MaterialesApp = () => {
     cantidad_minima: 0
   });
 
-  const API_BASE = 'http://localhost:3000/api/materiales';
+  const isEdit = !!selectedMaterial;
 
-  const loadMateriales = async () => {
+  const resetForm = () => {
+    setFormData({ nombre: '', cantidad: 0, es_material_menor: 1, categoria: '', cantidad_minima: 0 });
+    setSelectedMaterial(null);
+  };
+
+  const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_BASE);
-      const data = await res.json();
-      setMateriales(data);
+      const [mats, alerts] = await Promise.all([
+        getMateriales(),
+        getAlertasMateriales()
+      ]);
+      setMateriales(mats);
+      setAlerts(alerts);
     } catch (e) {
-      console.error('Error al cargar materiales:', e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadAlerts = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/alerts`);
-      const data = await res.json();
-      setAlerts(data);
-    } catch (e) {
-      console.error('Error al cargar alertas:', e);
-    }
-  };
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const url = selectedMaterial ? `${API_BASE}/${selectedMaterial.id}` : API_BASE;
-      const method = selectedMaterial ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (res.ok) {
-        await loadMateriales();
-        await loadAlerts();
-        setShowModal(false);
-        resetForm();
+      if (isEdit) {
+        await actualizarMaterial(selectedMaterial.id, formData);
+      } else {
+        await crearMaterial(formData);
       }
+      setShowModal(false);
+      resetForm();
+      loadData();
     } catch (e) {
-      console.error('Error al guardar material:', e);
+      console.error('Error al guardar:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar material?')) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        await loadMateriales();
-        await loadAlerts();
-      }
-    } catch (e) {
-      console.error('Error al eliminar:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (material) => {
-    setSelectedMaterial(material);
+  const handleEdit = (mat) => {
+    setSelectedMaterial(mat);
     setFormData({
-      nombre: material.nombre || '',
-      cantidad: material.cantidad || 0,
-      es_material_menor: material.es_material_menor ?? 1,
-      categoria: material.categoria || '',
-      cantidad_minima: material.cantidad_minima || 0
+      nombre: mat.nombre,
+      cantidad: mat.cantidad,
+      es_material_menor: mat.es_material_menor,
+      categoria: mat.categoria,
+      cantidad_minima: mat.cantidad_minima
     });
     setShowModal(true);
   };
 
-  const resetForm = () => {
-    setFormData({
-      nombre: '',
-      cantidad: 0,
-      es_material_menor: 1,
-      categoria: '',
-      cantidad_minima: 0
-    });
-    setSelectedMaterial(null);
+  const handleDelete = async (id) => {
+    if (!confirm('¿Eliminar material?')) return;
+    try {
+      await eliminarMaterial(id);
+      loadData();
+    } catch (e) {
+      console.error('Error al eliminar:', e);
+    }
   };
 
   const filtered = materiales.filter(m =>
     m.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     m.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  useEffect(() => {
-    loadMateriales();
-    loadAlerts();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,23 +117,7 @@ const MaterialesApp = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Alertas */}
-        {alerts.length > 0 && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="text-red-600" />
-              <h3 className="font-semibold text-red-800">Stock Bajo</h3>
-            </div>
-            <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {alerts.map((a, i) => (
-                <li key={i} className="bg-white p-3 rounded border border-red-200">
-                  <p className="font-semibold text-red-800">{a.nombre}</p>
-                  <p className="text-sm text-red-600">Cantidad: {a.cantidad} (Min: {a.cantidad_minima})</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <AlertasStock alerts={alerts} />
 
         {/* Buscador */}
         <div className="flex items-center justify-between mb-4">
@@ -191,15 +158,9 @@ const MaterialesApp = () => {
                   <td className="px-6 py-3">{m.cantidad}</td>
                   <td className="px-6 py-3">{m.cantidad_minima}</td>
                   <td className="px-6 py-3">{m.es_material_menor ? 'Sí' : 'No'}</td>
-                  <td className="px-6 py-3">
-                    <div className="flex space-x-2">
-                      <button onClick={() => handleEdit(m)} className="text-indigo-600 hover:text-indigo-900" title="Editar">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(m.id)} className="text-red-600 hover:text-red-900" title="Eliminar">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <td className="px-6 py-3 flex space-x-2">
+                    <button onClick={() => handleEdit(m)} className="text-indigo-600 hover:text-indigo-900"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(m.id)} className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
@@ -208,63 +169,16 @@ const MaterialesApp = () => {
         </div>
       </main>
 
-      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{selectedMaterial ? 'Editar' : 'Nuevo'} Material</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Nombre</label>
-                <input type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Cantidad</label>
-                <input type="number" value={formData.cantidad} onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value || 0) })}
-                  className="w-full mt-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Cantidad Mínima</label>
-                <input type="number" value={formData.cantidad_minima} onChange={(e) => setFormData({ ...formData, cantidad_minima: parseInt(e.target.value || 0) })}
-                  className="w-full mt-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Categoría</label>
-                <input type="text" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">¿Material menor?</label>
-                <select value={formData.es_material_menor} onChange={(e) => setFormData({ ...formData, es_material_menor: parseInt(e.target.value) })}
-                  className="w-full mt-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
-                  <option value={1}>Sí</option>
-                  <option value={0}>No</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end pt-4 space-x-2">
-                <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded text-gray-700">Cancelar</button>
-                <button onClick={handleSubmit} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MaterialFormModal
+          formData={formData}
+          setFormData={setFormData}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSubmit}
+          loading={loading}
+          isEdit={isEdit}
+        />
       )}
     </div>
   );
-};
-
-export default MaterialesApp;
+}

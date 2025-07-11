@@ -13,7 +13,7 @@ export default function StockLayout({ rol }) {
   return (
     <>
         
-            <NavbarStock />
+      <NavbarStock />
       <Routes>
         <Route path="/" element={<MaterialesApp />} />
         <Route path="/materiales" element={<MaterialesApp />} />

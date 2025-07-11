@@ -82,10 +82,18 @@ const Navbar = ({ rol, setRol }) => {
             className="text-2xl font-bold text-white tracking-tight hover:text-blue-400 transition-colors font-mono"
           >
             CicloIT
-          </Link>
+          </Link>          
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
+            {rol && (
+            <Link
+              to="/seleccionar-modulo"
+              className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200"
+            >
+              Módulos
+            </Link>
+          )}
             {filteredMenuOptions.register && (
               <DropdownMenu
                 isOpen={state.dropdowns.register}
@@ -149,11 +157,10 @@ const Navbar = ({ rol, setRol }) => {
 
       <div
         id="mobile-menu"
-        className={`md:hidden transition-all duration-300 ease-in-out ${
-          state.isMobileMenuOpen
-            ? "max-h-screen opacity-100"
-            : "max-h-0 opacity-0 pointer-events-none"
-        }`}
+        className={`md:hidden transition-all duration-300 ease-in-out ${state.isMobileMenuOpen
+          ? "max-h-screen opacity-100"
+          : "max-h-0 opacity-0 pointer-events-none"
+          }`}
       >
         <div className="px-3 py-4 space-y-2 bg-slate-800 shadow-xl rounded-b-lg">
           {filteredMenuOptions.register && (
@@ -179,12 +186,14 @@ const Navbar = ({ rol, setRol }) => {
           )}
 
           {rol && (
-            <button
-              onClick={handleLogout}
-              className="w-full text-left text-base font-medium text-gray-200 hover:bg-red-600 px-4 py-3 rounded-md transition-colors duration-200"
-            >
-              Cerrar sesión
-            </button>
+            <>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left text-base font-medium text-gray-200 hover:bg-red-600 px-4 py-3 rounded-md transition-colors duration-200"
+              >
+                Cerrar sesión
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -508,82 +508,66 @@ export const editarReclamo = async (id, datos) => {
   return await res.json();
 };
 
+// -------------------------
+// 📦 Materiales
+// -------------------------
+export const getMateriales = async () => {
+  const res = await fetch(`${API_URL}/api/materiales`);
+  if (!res.ok) throw new Error('Error al cargar materiales');
+  return await res.json();
+};
 
-export async function listarMateriales() {
-  const res = await fetch(`${API_URL}/materiales`);
-  if (!res.ok) throw new Error("Error obteniendo materiales");
-  return res.json();
-}
+
+export const getAlertasMateriales = async () => {
+  const res = await fetch(`${API_URL}/api/materiales/alerts`);
+  if (!res.ok) throw new Error('Error al cargar alertas');
+  return await res.json();
+};
 
 export const crearMaterial = async (data) => {
-  const res = await fetch(`${API_URL}/materiales`, {
+  const res = await fetch(`${API_URL}/api/materiales`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Error al crear material');
-  return await res.json();
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Error al crear material');
+  return result;
 };
-
-export const ObtenerMaterialById = async (id) => {
-  const res = await fetch(`${API_URL}/materiales/${id}`);
-  if (!res.ok) throw new Error('Material no encontrado');
-  return await res.json();
-};
-
-
 
 export const actualizarMaterial = async (id, data) => {
-  const res = await fetch(`${API_URL}/materiales/${id}`, {
+  const res = await fetch(`${API_URL}/api/materiales/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Error al actualizar material');
-  return await res.json();
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Error al actualizar material');
+  return result;
 };
 
 export const eliminarMaterial = async (id) => {
-  const res = await fetch(`${API_URL}/materiales/${id}`, {
+  const res = await fetch(`${API_URL}/api/materiales/${id}`, {
     method: 'DELETE',
   });
+
   if (!res.ok) throw new Error('Error al eliminar material');
   return await res.json();
 };
 
-// =================== MOVIMIENTOS ===================
-
-export const registrarMovimiento = async (data) => {
-  const res = await fetch(`${API_URL}/movimientos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Error al registrar movimiento');
-  return await res.json();
-};
-
-export const ObtenerMovimientos = async (query = {}) => {
-  const url = new URL(`${API_URL}/movimientos`);
-  Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') url.searchParams.append(key, value);
-  });
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Error al obtener movimientos');
-  return await res.json();
-};
-
-// =================== RESPONSABLES ===================
-
-export const ObtenerResponsables = async () => {
-  const res = await fetch(`${API_URL}/responsable`);
-  if (!res.ok) throw new Error('Error al obtener responsables');
+// -------------------------
+// 👤 Responsables
+// -------------------------
+export const getResponsables = async () => {
+  const res = await fetch(`${API_URL}/api/responsables`);
+  if (!res.ok) throw new Error('Error al cargar responsables');
   return await res.json();
 };
 
 export const crearResponsable = async (data) => {
-  const res = await fetch(`${API_URL}/responsable`, {
+  const res = await fetch(`${API_URL}/api/responsables`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -592,18 +576,41 @@ export const crearResponsable = async (data) => {
   return await res.json();
 };
 
-// =================== ALERTAS ===================
-
-export const ObtenerAlertasStock = async () => {
-  const res = await fetch(`${API_URL}/alertas`);
-  if (!res.ok) throw new Error('Error al obtener alertas');
+export const actualizarResponsable = async (id, data) => {
+  const res = await fetch(`${API_URL}/api/responsables/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al actualizar responsable');
   return await res.json();
 };
 
-// =================== DASHBOARD ===================
+export const eliminarResponsable = async (id) => {
+  const res = await fetch(`${API_URL}/api/responsables/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Error al eliminar responsable');
+};
 
-export const ObtenerDashboard = async () => {
-  const res = await fetch(`${API_URL}/dashboard`);
-  if (!res.ok) throw new Error('Error al obtener datos del dashboard');
+// -------------------------
+// 🔄 Movimientos
+// -------------------------
+export const getMovimientos = async () => {
+  const res = await fetch(`${API_URL}/api/movimientos`);
+  if (!res.ok) throw new Error('Error al cargar movimientos');
   return await res.json();
+};
+
+
+export const crearMovimiento = async (data) => {
+  const res = await fetch(`${API_URL}/api/movimientos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || result.message || 'Error al crear movimiento');
+  return result;
 };

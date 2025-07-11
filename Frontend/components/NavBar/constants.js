@@ -9,7 +9,7 @@ export const MENU_OPTIONS = {
       { to: "/usuarios", label: "Usuarios" },
       { to: "/orden-trabajo", label: "Ordenes de trabajo" },
       { to: "/reclamos", label: "Reclamos" },
-      { to: "/ver-presupuesto", label: "Presupuesto" },
+      { to: "/ver-presupuesto", label: "Presupuesto" },      
     ],
     add:[
       {to: "/crear-presupuesto", label: "Crear presupuesto"},

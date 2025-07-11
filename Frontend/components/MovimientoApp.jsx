@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import MovimientoForm from './Stock/MovimientoForm';
 import MovimientosTable from './Stock/MovimientoTable';
-const API_URL = 'https://ciclo-it.vercel.app';
+
+import {
+  getMovimientos,
+  getMateriales,
+  getResponsables,
+  crearMovimiento
+} from '../services/api';
+
 export default function MovimientosApp() {
   const [movimientos, setMovimientos] = useState([]);
   const [materiales, setMateriales] = useState([]);
@@ -16,29 +23,20 @@ export default function MovimientosApp() {
   });
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
-const API_MOVIMIENTOS = `${API_URL}/api/movimientos`;
-const API_MATERIALES = `${API_URL}/api/materiales`;
-const API_RESPONSABLES = `${API_URL}/api/responsables`;
-{
-  /*
-    const API_MOVIMIENTOS = 'http://localhost:3000/api/movimientos';
-  const API_MATERIALES = 'http://localhost:3000/api/materiales';
-  const API_RESPONSABLES = 'http://localhost:3000/api/responsables';
-  */
-}
-  const loadData = async () => {
-    const [mRes, matRes, respRes] = await Promise.all([
-      fetch(API_MOVIMIENTOS),
-      fetch(API_MATERIALES),
-      fetch(API_RESPONSABLES)
-    ]);
-    const mData = await mRes.json();
-    const matData = await matRes.json();
-    const respData = await respRes.json();
 
-    setMovimientos(mData);
-    setMateriales(matData);
-    setResponsables(respData);
+  const loadData = async () => {
+    try {
+      const [movs, mats, resps] = await Promise.all([
+        getMovimientos(),
+        getMateriales(),
+        getResponsables(),
+      ]);
+      setMovimientos(movs);
+      setMateriales(mats);
+      setResponsables(resps);
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+    }
   };
 
   useEffect(() => {
@@ -50,18 +48,7 @@ const API_RESPONSABLES = `${API_URL}/api/responsables`;
     setLoading(true);
     setMensaje('');
     try {
-      const res = await fetch(API_MOVIMIENTOS, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || data.message || 'Error al registrar el movimiento');
-      }
-
+      await crearMovimiento(formData);
       setMensaje('Movimiento registrado correctamente');
       setFormData({
         tipo: 'entrada',
